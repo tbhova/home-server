@@ -1,0 +1,90 @@
+version: '3.1'
+# TODO mark more volumes as read only
+services:
+
+  # https://docs.traefik.io
+  # Largely lifted from:
+  # https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
+  traefik:
+    # The official v2 Traefik docker image
+    image: "traefik:v2.1"
+    container_name: "traefik"
+    restart: always
+    environment:
+      - CF_DNS_API_TOKEN=${API_KEY} # TODO load environment variables
+      - TZ=America/Los_Angeles
+      - PUID=1000
+      - PGID=1000
+    command:
+    #### These are the CLI commands that will configure Traefik and tell it how to work! ####
+      ## API Settings - https://docs.traefik.io/operations/api/, endpoints - https://docs.traefik.io/operations/api/#endpoints ##
+      - "--api.dashboard=true" # <== Enabling the dashboard to view services, middlewares, routers, etc...
+      ## Log Settings (options: ERROR, DEBUG, PANIC, FATAL, WARN, INFO) - https://docs.traefik.io/observability/logs/ ##
+      - "--log.level=DEBUG" # TODO disable INFO
+      ## Provider Settings - https://docs.traefik.io/providers/docker/#provider-configuration ##
+      - "--providers.docker=true" # <== Enabling docker as the provider for traefik
+      - "--providers.docker.exposedbydefault=false" # <== Don't expose every container to traefik, only expose enabled ones
+      #- "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
+      ## Entrypoints Settings - https://docs.traefik.io/routing/entrypoints/#configuration ##
+      - "--entrypoints.websecure.address=:443"    # HTTPS
+      ## Certificate Settings (DNS Challenge w/ Cloudflare) -  https://docs.traefik.io/https/acme/#configuration-examples ##
+      - "--certificatesresolvers.dns-cloudflare.acme.email=tbhovanec@gmail.com"
+      - "--certificatesresolvers.dns-cloudflare.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge=true"
+      - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53, 1.0.0.1:53"
+      ## Global settings
+      - "--global.sendAnonymousUsage" # <== Send anonymous usage data https://docs.traefik.io/contributing/data-collection/
+    ports:
+      - "8443:443"  # <== https
+    volumes:
+      #- "./traefik:/etc/traefik" # <== Traefik looks for config at /etc/traefik/traefik.yaml https://docs.traefik.io/getting-started/configuration-overview/#configuration-file
+      - "letsencrypt:/letsencrypt" # <== Volume for certs (TLS)
+      - "/var/run/docker.sock:/var/run/docker.sock:ro" # <== So that Traefik can listen to the Docker events.
+    labels:
+    #### Labels define the behavior and rules of the traefik proxy for this container. ####     
+      - "traefik.enable=true" # <== Enable traefik on itself to view dashboard and assign subdomain to view it
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.tylerhovanec.com`)"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+      - "traefik.http.routers.traefik-secure.entryPoints=websecure"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
+      #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
+
+  # Also lifted from https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
+  # Secondarily lifted from https://github.com/AJubatus/docker-compose/blob/5c84a56829c4ed8058f81981b686d68578847e65/docker-compose.yml
+  homeassistant:
+    container_name: homeassistant
+    hostname: homeassistant
+    image: homeassistant/home-assistant:stable
+    # TODO healthcheck https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
+    volumes:
+      - ./home_assistant_docker:/config
+    environment:
+      - TZ=America/Los_Angeles
+      - PUID=1000
+      - PGID=1000
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homeassistant-secure.rule=Host(`home.tylerhovanec.com`)"
+      - "traefik.http.routers.homeassistant-secure.service=homeassistant"
+      - "traefik.http.routers.homeassistant-secure.tls=true"
+      - "traefik.http.routers.homeassistant-secure.tls.certresolver=dns-cloudflare"
+      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
+      
+  # https://github.com/oznu/docker-cloudflare-ddns
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns
+    container_name: 'cloudflare-ddns'
+    restart: always
+    environment:
+      - API_KEY=${API_KEY} # TODO load environment variables
+      - ZONE=tylerhovanec.com
+      - PROXIED=false
+      
+volumes:
+  letsencrypt:
+    # Intentionally blank. Traefik will add an acme.json certificate inside this volume.
+    # We are not using a file in the shared vagrant directory because all files in the vagrant share have 777 permissions and letsencrypt/Traefik require 600.

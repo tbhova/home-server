@@ -1,0 +1,22 @@
+Notes:
+
+Installation.
+Install the following:
+* Virtual Box
+* VirtualBox extension pack
+* Enable Intel VT-X or AMD-V
+* Vagrant
+* Vagrant vbguest
+  * `vagrant plugin install vagrant-vbguest`
+* Forward 443 to 8443 on your router
+	
+
+To reprovision VM:
+vagrant destroy
+vagrant up
+
+To restart:
+vagrant reload
+
+To SSH:
+vagrant ssh
