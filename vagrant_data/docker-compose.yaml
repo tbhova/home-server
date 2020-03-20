@@ -1,16 +1,14 @@
 version: '3.1'
-# TODO mark more volumes as read only
-services:
 
+services:
   # https://docs.traefik.io
-  # Largely lifted from:
-  # https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
   traefik:
     # The official v2 Traefik docker image
     image: "traefik:v2.1"
     container_name: "traefik"
     restart: always
     environment:
+      # https://docs.traefik.io/https/acme/#providers
       - CF_DNS_API_TOKEN=${API_KEY} # TODO load environment variables
       - TZ=America/Los_Angeles
       - PUID=1000
@@ -24,7 +22,9 @@ services:
       ## Provider Settings - https://docs.traefik.io/providers/docker/#provider-configuration ##
       - "--providers.docker=true" # <== Enabling docker as the provider for traefik
       - "--providers.docker.exposedbydefault=false" # <== Don't expose every container to traefik, only expose enabled ones
-      #- "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
+      - "--providers.file=true" # Enable file provider for services hosted outside of docker compose.
+      - "--providers.file.watch=true"
+      - "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
       ## Entrypoints Settings - https://docs.traefik.io/routing/entrypoints/#configuration ##
       - "--entrypoints.websecure.address=:443"    # HTTPS
       ## Certificate Settings (DNS Challenge w/ Cloudflare) -  https://docs.traefik.io/https/acme/#configuration-examples ##
@@ -38,7 +38,7 @@ services:
     ports:
       - "8443:443"  # <== https
     volumes:
-      #- "./traefik:/etc/traefik" # <== Traefik looks for config at /etc/traefik/traefik.yaml https://docs.traefik.io/getting-started/configuration-overview/#configuration-file
+      - "./traefik:/etc/traefik:ro" # <== Traefik looks for config at /etc/traefik/traefik.yaml https://docs.traefik.io/getting-started/configuration-overview/#configuration-file
       - "letsencrypt:/letsencrypt" # <== Volume for certs (TLS)
       - "/var/run/docker.sock:/var/run/docker.sock:ro" # <== So that Traefik can listen to the Docker events.
     labels:
@@ -51,28 +51,16 @@ services:
       - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
-
-  # Also lifted from https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
-  # Secondarily lifted from https://github.com/AJubatus/docker-compose/blob/5c84a56829c4ed8058f81981b686d68578847e65/docker-compose.yml
-  homeassistant:
-    container_name: homeassistant
-    hostname: homeassistant
-    image: homeassistant/home-assistant:stable
-    # TODO healthcheck https://github.com/CCreek96/home-stack-solo/blob/446769ba8414cef28f03dbfda01b8e369ff56538/docker-compose.yml
-    volumes:
-      - ./home_assistant_docker:/config
-    environment:
-      - TZ=America/Los_Angeles
-      - PUID=1000
-      - PGID=1000
-    restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homeassistant-secure.rule=Host(`home.tylerhovanec.com`)"
-      - "traefik.http.routers.homeassistant-secure.service=homeassistant"
-      - "traefik.http.routers.homeassistant-secure.tls=true"
-      - "traefik.http.routers.homeassistant-secure.tls.certresolver=dns-cloudflare"
-      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
+      
+      # TODO get plex working or move to docker.
+      #- "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
+      #- "traefik.http.routers.plex-secure.service=plex"
+      #- "traefik.http.routers.plex-secure.entryPoints=websecure"
+      #- "traefik.http.routers.plex-secure.tls=true"
+      #- "traefik.http.routers.plex-secure.tls.certresolver=dns-cloudflare"
+      ##- "traefik.http.services.plex.loadbalancer.server.port=32400"
+      ##- "traefik.http.services.plex.loadbalancer.server.url=http://127.0.0.1:32400"
+      #- "traefik.http.services.plex.loadbalancer.server.url=https://192.168.1.100:32400"
       
   # https://github.com/oznu/docker-cloudflare-ddns
   cloudflare-ddns:
