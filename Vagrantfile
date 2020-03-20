@@ -17,17 +17,11 @@ Vagrant.configure("2") do |config|
   
   config.vm.host_name = "debian-buster-vagrant"
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
-
   # Network settings
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
   
   # Used to serve HTTP/HTTPS (443 is forwarded to 8443 on the router)
   config.vm.network "forwarded_port", guest: 8443, host: 8443
@@ -39,12 +33,12 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.33.10"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
-  config.vm.network "public_network" # TODO remove
+  # config.vm.network "public_network"
 
   # Folder settings
   # Share an additional folder to the guest VM. The first argument is
@@ -78,10 +72,10 @@ Vagrant.configure("2") do |config|
 	# vb.gui = true
 	vb.name = "debian-buster-vagrant"
     # Customize the amount of memory on the VM:
-    vb.memory = 1024
+    vb.memory = 512
 	# Limit CPU consumption
 	# vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
-	vb.cpus = 2
+	vb.cpus = 1
 	# Shutdown the VM when restarting/powering off the host OS.
 	vb.customize ["setextradata", :id, "GUI/DefaultCloseAction", "PowerOff"]
   end
@@ -89,8 +83,6 @@ Vagrant.configure("2") do |config|
   # To install use:
   # vagrant plugin install vagrant-vbguest
   config.vbguest.auto_update = true
-  
-  # config.vm.boot_timeout = 600
 
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
