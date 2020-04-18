@@ -83,6 +83,8 @@ Vagrant.configure("2") do |config|
 	vb.customize ["setextradata", :id, "GUI/DefaultCloseAction", "PowerOff"]
   end
   
+  config.vm.boot_timeout = 600
+  
   # To install use:
   # vagrant plugin install vagrant-vbguest
   config.vbguest.auto_update = true
