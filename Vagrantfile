@@ -50,6 +50,8 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
   config.vm.synced_folder "./vagrant_data", "/vagrant_data"
+  config.vm.synced_folder "S:\\Movies", "/data/movies"
+  config.vm.synced_folder "S:\\TV", "/data/tv"
   
   # Disable default rsync
   config.vm.synced_folder '.', '/vagrant', disabled: true
