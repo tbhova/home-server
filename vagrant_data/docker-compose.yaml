@@ -9,7 +9,7 @@ services:
     restart: always
     environment:
       # https://docs.traefik.io/https/acme/#providers
-      - CF_DNS_API_TOKEN=${API_KEY} # TODO load environment variables
+      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_KEY}
       - TZ=America/Los_Angeles
       - PUID=1000
       - PGID=1000
@@ -51,7 +51,7 @@ services:
       - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
-      
+       
       # TODO get plex working or move to docker.
       #- "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
       #- "traefik.http.routers.plex-secure.service=plex"
@@ -69,7 +69,7 @@ services:
     restart: always
     environment:
       - TZ=America/Los_Angeles
-      - API_KEY=${API_KEY} # TODO load environment variables
+      - API_KEY=${CLOUDFLARE_API_KEY}
       - ZONE=tylerhovanec.com
       - PROXIED=false
       
@@ -90,7 +90,7 @@ services:
      - 32414:32414/udp # GDM network discovery
     environment:
       - TZ=America/Los_Angeles
-      - PLEX_CLAIM=${PLEX_CLAIM} # TODO load environment variables
+      - PLEX_CLAIM=${PLEX_CLAIM_TOKEN}
       - ADVERTISE_IP=http://192.168.1.100:32400/
     hostname: <hostname>
     volumes:
