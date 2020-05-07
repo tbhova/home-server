@@ -34,7 +34,8 @@ services:
       - "--certificatesresolvers.dns-cloudflare.acme.email=tbhovanec@gmail.com"
       - "--certificatesresolvers.dns-cloudflare.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge=true"
-      - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge.provider=cloudflare"
+      # Commented out because: https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Forcing_the_Use_of_Wildcard_Certs
+      # - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.dns-cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53, 1.0.0.1:53"
       ## Global settings
       - "--global.sendAnonymousUsage" # <== Send anonymous usage data https://docs.traefik.io/contributing/data-collection/
@@ -52,6 +53,7 @@ services:
       - "traefik.http.routers.traefik-secure.entryPoints=websecure"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
+      - "traefik.http.routers.traefik-secure.middlewares=rate-limit@file"
       
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
@@ -95,7 +97,7 @@ services:
       - "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
       - "traefik.http.routers.plex-secure.entryPoints=websecure"
       - "traefik.http.routers.plex-secure.tls=true"
-      - "traefik.http.routers.plex-secure.tls.certResolver=dns-cloudflare"
+      - "traefik.http.routers.plex-secure.middlewares=rate-limit@file"
       
 volumes:
   letsencrypt:

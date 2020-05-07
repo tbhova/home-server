@@ -10,6 +10,15 @@ http:
       service: homeassistant # refers to the http.services.homeassistant entry
       tls:
         certResolver: dns-cloudflare
+      middlewares:
+        - rate-limit
+
+  middlewares:
+    # https://docs.traefik.io/middlewares/ratelimit/
+    rate-limit:
+      rateLimit:
+        average: 100 # QPS
+        burst: 50 # Additional burst QPS
 
   services:
   # Define how to reach an existing service outside of docker
