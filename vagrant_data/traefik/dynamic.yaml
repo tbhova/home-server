@@ -11,8 +11,7 @@ http:
       tls:
         certResolver: dns-cloudflare
       middlewares:
-        - rate-limit
-        - secure-headers
+        - chain-auth
 
   middlewares:
     # https://docs.traefik.io/middlewares/ratelimit/
@@ -51,6 +50,21 @@ http:
         customResponseHeaders:
           X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex,"
           server: ""
+    # https://docs.traefik.io/middlewares/chain/
+    # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Security_Headers_as_Middlewares_File
+    # No auth for services like Plex.
+    chain-no-auth:
+      chain:
+        middlewares:
+         - "rate-limit"
+         - "secure-headers"
+     # Auth for other services
+     chain-auth:
+      chain:
+        middlewares:
+         - "rate-limit"
+         - "secure-headers"
+         # TODO Google oauth
 
   services:
   # Define how to reach an existing service outside of docker
