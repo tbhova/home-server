@@ -53,7 +53,7 @@ services:
       - "traefik.http.routers.traefik-secure.entryPoints=websecure"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
-      - "traefik.http.routers.traefik-secure.middlewares=rate-limit@file"
+      - "traefik.http.routers.traefik-secure.middlewares=rate-limit@file,secure-headers@file"
       
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
@@ -97,7 +97,7 @@ services:
       - "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
       - "traefik.http.routers.plex-secure.entryPoints=websecure"
       - "traefik.http.routers.plex-secure.tls=true"
-      - "traefik.http.routers.plex-secure.middlewares=rate-limit@file"
+      - "traefik.http.routers.plex-secure.middlewares=rate-limit@file,secure-headers@file"
       
 volumes:
   letsencrypt:

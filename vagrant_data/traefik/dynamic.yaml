@@ -12,6 +12,7 @@ http:
         certResolver: dns-cloudflare
       middlewares:
         - rate-limit
+        - secure-headers
 
   middlewares:
     # https://docs.traefik.io/middlewares/ratelimit/
@@ -19,6 +20,37 @@ http:
       rateLimit:
         average: 100 # QPS
         burst: 50 # Additional burst QPS
+    # https://docs.traefik.io/middlewares/headers/
+    # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Security_Headers_as_Middlewares_File
+    secure-headers: 
+      headers:
+        accessControlAllowMethods:
+         - "GET"
+         - "OPTIONS"
+         - "PUT"
+        accessControlMaxAge: 100
+        hostsProxyHeaders:
+         - "X-Forwarded-Host"
+        sslRedirect: true
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+      # frameDeny = true #overwritten by customFrameOptionsValue
+        #customFrameOptionsValue: "allow-from https:tylerhovanec.com" #CSP takes care of this but may be needed for organizr. 
+        contentTypeNosniff: true 
+        browserXssFilter: true 
+        # Can only be used if the middleware is declared in docker labels instead of a file.
+      # sslForceHost = true # add sslHost to all of the services
+      # sslHost = "example.com"
+        referrerPolicy: "same-origin" 
+       # Setting contentSecurityPolicy is more secure but it can break things. Proper auth will reduce the risk.
+       # the below line also breaks some apps due to 'none' - sonarr, radarr, etc.
+       # contentSecurityPolicy = "frame-ancestors '*.example.com:*';object-src 'none';script-src 'none';"
+        featurePolicy: "camera 'none'; geolocation 'none'; microphone 'none'; payment 'none'; usb 'none'; vr 'none';" 
+        customResponseHeaders:
+          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex,"
+          server: ""
 
   services:
   # Define how to reach an existing service outside of docker
