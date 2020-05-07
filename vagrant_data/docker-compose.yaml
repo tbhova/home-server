@@ -4,7 +4,7 @@ services:
   # https://docs.traefik.io
   traefik:
     # The official v2 Traefik docker image
-    image: "traefik:v2.1"
+    image: "traefik:chevrotin"
     container_name: "traefik"
     restart: always
     environment:
@@ -25,8 +25,11 @@ services:
       - "--providers.file=true" # Enable file provider for services hosted outside of docker compose.
       - "--providers.file.watch=true"
       - "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
+      #- --providers.docker.network=t2_proxy
       ## Entrypoints Settings - https://docs.traefik.io/routing/entrypoints/#configuration ##
       - "--entrypoints.websecure.address=:443"    # HTTPS
+      # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/
+      - --entrypoints.https.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22
       ## Certificate Settings (DNS Challenge w/ Cloudflare) -  https://docs.traefik.io/https/acme/#configuration-examples ##
       - "--certificatesresolvers.dns-cloudflare.acme.email=tbhovanec@gmail.com"
       - "--certificatesresolvers.dns-cloudflare.acme.storage=/letsencrypt/acme.json"
@@ -49,18 +52,9 @@ services:
       - "traefik.http.routers.traefik-secure.entryPoints=websecure"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certResolver=dns-cloudflare"
+      
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
-       
-      # TODO get plex working or move to docker.
-      #- "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
-      #- "traefik.http.routers.plex-secure.service=plex"
-      #- "traefik.http.routers.plex-secure.entryPoints=websecure"
-      #- "traefik.http.routers.plex-secure.tls=true"
-      #- "traefik.http.routers.plex-secure.tls.certresolver=dns-cloudflare"
-      ##- "traefik.http.services.plex.loadbalancer.server.port=32400"
-      ##- "traefik.http.services.plex.loadbalancer.server.url=http://127.0.0.1:32400"
-      #- "traefik.http.services.plex.loadbalancer.server.url=https://192.168.1.100:32400"
       
   # https://github.com/oznu/docker-cloudflare-ddns
   cloudflare-ddns:
@@ -95,9 +89,20 @@ services:
     hostname: <hostname>
     volumes:
       - /mnt/user/appdata/plex_config:/config
-      #- /data:/data
+      - /mnt/user/media:/data
+    labels:
+      - "traefik.enable=true" 
+      - "traefik.http.routers.plex-secure.rule=Host(`plex.tylerhovanec.com`)"
+      - "traefik.http.routers.plex-secure.entryPoints=websecure"
+      - "traefik.http.routers.plex-secure.tls=true"
+      - "traefik.http.routers.plex-secure.tls.certResolver=dns-cloudflare"
       
 volumes:
   letsencrypt:
     # Intentionally blank. Traefik will add an acme.json certificate inside this volume.
     # We are not using a file in the shared vagrant directory because all files in the vagrant share have 777 permissions and letsencrypt/Traefik require 600.
+
+networks:
+  t2_proxy:
+    external:
+      name: t2_proxy

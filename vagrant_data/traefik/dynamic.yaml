@@ -1,13 +1,8 @@
+# Most services should use Docker labels. Non docker services can go in here. See: https://community.containo.us/t/expose-a-docker-container-without-labels/1907/9
+
 http:
   routers:
     # Define a connection between requests and services
-    plex-secure:
-      rule: "Host(`plex.tylerhovanec.com`)"
-      entryPoints:
-        - "websecure"
-      service: plex # refers to the http.services.plex entry
-      tls:
-        certResolver: dns-cloudflare
     homeassistant-secure:
       rule: "Host(`home.tylerhovanec.com`)"
       entryPoints:
@@ -16,13 +11,8 @@ http:
       tls:
         certResolver: dns-cloudflare
 
-  
   services:
   # Define how to reach an existing service outside of docker
-    plex:
-      loadBalancer:
-        servers:
-        - url: "https://192.168.1.100:32400/" # TODO move Plex to Docker
     homeassistant:
       loadBalancer:
         servers:
