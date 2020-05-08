@@ -11,7 +11,7 @@ http:
       tls:
         certResolver: dns-cloudflare
       middlewares:
-        - chain-auth
+        - chain-no-auth
 
   middlewares:
     # https://docs.traefik.io/middlewares/ratelimit/
@@ -50,6 +50,12 @@ http:
         customResponseHeaders:
           X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex,"
           server: ""
+    oauth:
+      forwardAuth:
+        address: "http://oauth:4181" # Make sure you have the OAuth service in docker-compose.yml
+        trustForwardHeader: true
+        authResponseHeaders:
+         - "X-Forwarded-User"
     # https://docs.traefik.io/middlewares/chain/
     # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Security_Headers_as_Middlewares_File
     # No auth for services like Plex.
@@ -64,7 +70,7 @@ http:
         middlewares:
          - "rate-limit"
          - "secure-headers"
-         # TODO Google oauth
+         - "oauth"
 
   services:
   # Define how to reach an existing service outside of docker

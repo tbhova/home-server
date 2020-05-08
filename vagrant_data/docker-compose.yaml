@@ -57,7 +57,44 @@ services:
       
       #- "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       #- "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/shared/.htpasswd"
-      
+
+  # Google OAuth - Single Sign On using OAuth 2.0
+  # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Setting_Up_OAuth_Forwarder_Container
+  # https://www.smarthomebeginner.com/google-oauth-with-traefik-docker/#Step_3a_Add_Traefik_OAuth_Container
+  oauth:
+    image: thomseddon/traefik-forward-auth:latest
+    container_name: oauth
+    restart: always
+    # networks:
+      # - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=America/Los_Angeles
+      - PROVIDERS_GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - PROVIDERS_GOOGLE_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - SECRET=${OAUTH_SECRET}
+      - COOKIE_DOMAIN=tylerhovanec.com
+      - INSECURE_COOKIE="false"
+      - AUTH_HOST=oauth.tylerhovanec.com
+      - URL_PATH=/_oauth
+      - WHITELIST=tbhovanec@gmail.com,hovanec.colleen@gmail.com
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - LIFETIME=2592000 # 30 days
+    labels:
+      - "traefik.enable=true" 
+     ## HTTP Routers
+      - "traefik.http.routers.oauth-rtr.entrypoints=websecure"
+      - "traefik.http.routers.oauth-rtr.rule=Host(`oauth.tylerhovanec.com`)"
+      - "traefik.http.routers.oauth-rtr.tls=true"
+      ## HTTP Services
+      - "traefik.http.routers.oauth-rtr.service=oauth-svc"
+      - "traefik.http.services.oauth-svc.loadbalancer.server.port=4181"
+      ## Middlewares
+      - "traefik.http.routers.oauth-rtr.middlewares=chain-auth@file"
+
+
   # https://github.com/oznu/docker-cloudflare-ddns
   cloudflare-ddns:
     image: oznu/cloudflare-ddns
