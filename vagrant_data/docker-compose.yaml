@@ -26,7 +26,6 @@ services:
       - "--providers.file=true" # Enable file provider for services hosted outside of docker compose.
       - "--providers.file.watch=true"
       - "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
-      #- --providers.docker.network=t2_proxy
       ## Entrypoints Settings - https://docs.traefik.io/routing/entrypoints/#configuration ##
       - "--entrypoints.websecure.address=:443"    # HTTPS
       # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/
@@ -242,15 +241,17 @@ services:
 
   # https://github.com/plexinc/pms-docker/blob/master/docker-compose-bridge.yml.template
   plex:
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:public
     container_name: plex
     restart: always
     networks:
       - t2_proxy
+    security_opt:
+      - no-new-privileges:true
     ports: # https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
      - 32400:32400/tcp # Primary
-      #- 3005:3005/tcp # Plex Home Theater Companion
-      #- 8324:8324/tcp# Plex Roku Companion
+     #- 3005:3005/tcp # Plex Home Theater Companion
+     #- 8324:8324/tcp # Plex Roku Companion
      - 32469:32469/tcp # Plex DLNA Server
      - 1900:1900/udp # Plex DLNA Server
      - 32410:32410/udp # GDM network discovery
@@ -260,17 +261,36 @@ services:
     environment:
       - TZ=$TZ
       - PLEX_CLAIM=${PLEX_CLAIM_TOKEN}
-      - ADVERTISE_IP=http://192.168.1.100:32400/
-    hostname: <hostname> # TODO
+      - ADVERTISE_IP=http://192.168.1.100:32400/ # plex.${DOMAINNAME}
+    hostname: "PlexServer"
     volumes:
       - /mnt/user/appdata/docker/plex_config:/config
+      - /mnt/user/appdata/docker/plex_tmp:/transcode
       - /mnt/user/media:/data
     labels:
       - "traefik.enable=true" 
+      ## Routers
       - "traefik.http.routers.plex-secure.rule=Host(`plex.${DOMAINNAME}`)"
       - "traefik.http.routers.plex-secure.entryPoints=websecure"
       - "traefik.http.routers.plex-secure.tls=true"
+      ## Middlewares
       - "traefik.http.routers.plex-secure.middlewares=chain-no-auth@file"
+      ## Services
+      - "traefik.http.routers.plexms-rtr.service=plexms-svc"
+      - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
+
+  # https://github.com/shawly/docker-ps3netsrv
+  ps3netsrv:
+    image: shawly/ps3netsrv
+    container_name: ps3netsrv
+    environment:
+      - TZ=$TZ
+      - USER_ID=$PUID
+      - GROUP_ID=$PGID
+    ports:
+      - "38008:38008"
+    volumes:
+      - "/mnt/user/games/PS3Games:/games:rw"
       
 volumes:
   letsencrypt:
