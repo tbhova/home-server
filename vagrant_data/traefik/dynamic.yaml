@@ -65,7 +65,7 @@ http:
          - "rate-limit"
          - "secure-headers"
      # Auth for other services
-    chain-auth:
+    chain-oauth:
       chain:
         middlewares:
          - "rate-limit"
