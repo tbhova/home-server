@@ -1,9 +1,3 @@
-*_log.txt
-.vagrant
 .cloudflare_ddns_api_key
-.cloud
-.storage
-home-assistant.log
-home-assistant_v2.db*
 secrets.yaml
 .env

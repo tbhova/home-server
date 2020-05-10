@@ -1,22 +1,8 @@
 Notes:
 
-Installation.
-Install the following:
-* Virtual Box
-* VirtualBox extension pack
-* Enable Intel VT-X or AMD-V
-* Vagrant
-* Vagrant vbguest
-  * `vagrant plugin install vagrant-vbguest`
+* Install docker-compose
 * Forward 443 to 8443 on your router
-	
-
-To reprovision VM:
-vagrant destroy
-vagrant up
-
-To restart:
-vagrant reload
-
-To SSH:
-vagrant ssh
+* Forward 80 to 8080 (or have your DNS provider redirect to HTTPS)
+* Fill out the .env file
+* Create UnRaid shares/modify paths
+* run start docker
