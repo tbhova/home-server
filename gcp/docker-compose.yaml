@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  # https://github.com/oznu/docker-cloudflare-ddns
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns
+    container_name: "cloudflare-ddns"
+    restart: always
+    environment:
+      - TZ=$TZ
+      - API_KEY=${CLOUDFLARE_API_KEY}
+      - ZONE=gcp.${DOMAINNAME}
+      - PROXIED=false
