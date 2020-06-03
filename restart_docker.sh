@@ -1,1 +1,1 @@
-docker-compose down --remove-orphans && docker-compose up -d --timeout 120
+docker-compose down --remove-orphans && docker-compose up -d --timeout 200
