@@ -12,6 +12,15 @@ http:
         certResolver: dns-cloudflare
       middlewares:
         - chain-no-auth
+    transmission-secure:
+      rule: "Host(`transmission.tylerhovanec.com`)"
+      entryPoints:
+        - "websecure"
+      service: transmission # refers to the http.services.transmission entry
+      tls:
+        certResolver: dns-cloudflare
+      middlewares:
+        - chain-oauth
 
   middlewares:
     # https://docs.traefik.io/middlewares/ratelimit/
@@ -78,3 +87,7 @@ http:
       loadBalancer:
         servers:
         - url: "http://192.168.1.127:8123/"
+    transmission:
+      loadBalancer:
+        servers:
+        - url: "http://192.168.1.100:9091/"

@@ -331,8 +331,8 @@ services:
     devices:
       - /dev/net/tun
     restart: always
-    #ports:
-    #- "9091:9091"
+    ports:
+    - "9091:9091"
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -362,17 +362,6 @@ services:
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
       #- TRANSMISSION_RATIO_LIMIT=2.00
       #- TRANSMISSION_RATIO_LIMIT_ENABLED=false
-    labels:
-      - "traefik.enable=true" 
-      ## Routers
-      - "traefik.http.routers.transmission-secure.rule=Host(`transmission.${DOMAINNAME}`)"
-      - "traefik.http.routers.transmission-secure.entryPoints=websecure"
-      - "traefik.http.routers.transmission-secure.tls=true"
-      ## Middlewares
-      - "traefik.http.routers.transmission-secure.middlewares=chain-oauth@file"
-      ## Services
-      - "traefik.http.routers.transmission-secure.service=transmission-svc"
-      - "traefik.http.services.transmission-svc.loadbalancer.server.port=9091"
 
   # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
   prometheus:
