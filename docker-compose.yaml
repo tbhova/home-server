@@ -18,7 +18,8 @@ services:
       ## API Settings - https://docs.traefik.io/operations/api/, endpoints - https://docs.traefik.io/operations/api/#endpoints ##
       - "--api.dashboard=true" # <== Enabling the dashboard to view services, middlewares, routers, etc...
       ## Log Settings (options: ERROR, DEBUG, PANIC, FATAL, WARN, INFO) - https://docs.traefik.io/observability/logs/ ##
-      - "--log.level=DEBUG" # TODO disable INFO
+      #- "--log.level=DEBUG"
+      - "--log.level=INFO"
       ## Provider Settings - https://docs.traefik.io/providers/docker/#provider-configuration ##
       - "--providers.docker=true" # <== Enabling docker as the provider for traefik
       - "--providers.docker.exposedbydefault=false" # <== Don't expose every container to traefik, only expose enabled ones
@@ -117,7 +118,27 @@ services:
       - TZ=$TZ
       - API_KEY=${CLOUDFLARE_API_KEY}
       - ZONE=${DOMAINNAME}
-      - PROXIED=false
+      - PROXIED=true
+      
+  #zigbee2mqtt:
+  #    container_name: zigbee2mqtt
+  #    #image: koenkk/zigbee2mqtt:latest
+  #    image: koenkk/zigbee2mqtt:1.10.0
+  #    restart: always
+  #    volumes:
+  #      - /mnt/user/appdata/docker/zigbee2mqtt:/app/data
+  #      - /run/udev:/run/udev:ro
+  #    privileged: true
+  #    devices:
+  #      - /dev/ttyACM0:/dev/ttyACM0
+  #      - /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00:/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00
+  #    network_mode: host
+  #    environment:
+  #      - TZ=$TZ
+  #      # - PUID=$PUID
+  #      # - PGID=$PGID
+  #      - PUID=0
+  #      - PGID=0
       
   # Portainer - WebUI for Containers
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
@@ -136,6 +157,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /mnt/user/appdata/docker/portainer/data:/data 
     environment:
+      - PUID=$PUID
+      - PGID=$PGID
       - TZ=$TZ
     labels:
       - "traefik.enable=true"
@@ -196,7 +219,8 @@ services:
        - "3306:3306"
      volumes:
        - /mnt/user/appdata/docker/mariadb/data:/config
-       - /etc/timezone:/etc/timezone:ro
+       # TODO
+      # - /etc/timezone:/etc/timezone:ro
        - /etc/localtime:/etc/localtime:ro
      environment:
        - PUID=$PUID
@@ -266,11 +290,11 @@ services:
     environment:
       - TZ=$TZ
       - PLEX_CLAIM=${PLEX_CLAIM_TOKEN}
-      - ADVERTISE_IP=http://192.168.1.100:32400/,https://plex.tylerhovanec.com # plex.${DOMAINNAME}
+      - ADVERTISE_IP=http://192.168.1.100:32400/,https://plex.${DOMAINNAME}
     hostname: "PlexServer"
     volumes:
       - /mnt/user/appdata/docker/plex_config:/config
-      - /mnt/user/appdata/docker/plex_tmp:/transcode
+      - /mnt/user/appdata/tmp/plex_tmp:/transcode
       - /mnt/user/media:/data
     labels:
       - "traefik.enable=true" 
@@ -281,7 +305,7 @@ services:
       ## Middlewares
       - "traefik.http.routers.plex-secure.middlewares=chain-no-auth@file"
       ## Services
-      - "traefik.http.routers.plexms-rtr.service=plexms-svc"
+      - "traefik.http.routers.plex-secure.service=plexms-svc"
       - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
 
   # https://github.com/shawly/docker-ps3netsrv
@@ -307,8 +331,8 @@ services:
     devices:
       - /dev/net/tun
     restart: always
-    ports:
-    - "9091:9091"
+    #ports:
+    #- "9091:9091"
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -333,12 +357,91 @@ services:
       - TRANSMISSION_RPC_HOST_WHITELIST=127.0.0.1,192.168.1.*
       - TRANSMISSION_RPC_PASSWORD=$TRANSMISSION_WEBUI_PASSWORD
       - TRANSMISSION_RPC_USERNAME=$TRANSMISSION_WEBUI_USERNAME
-      - TRANSMISSION_UMASK=002
-      - TRANSMISSION_SPEED_LIMIT_UP=150 #KB/s
+      - TRANSMISSION_UMASK=022
+      - TRANSMISSION_SPEED_LIMIT_UP=225 #KB/s
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
       #- TRANSMISSION_RATIO_LIMIT=2.00
       #- TRANSMISSION_RATIO_LIMIT_ENABLED=false
+    labels:
+      - "traefik.enable=true" 
+      ## Routers
+      - "traefik.http.routers.transmission-secure.rule=Host(`transmission.${DOMAINNAME}`)"
+      - "traefik.http.routers.transmission-secure.entryPoints=websecure"
+      - "traefik.http.routers.transmission-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.transmission-secure.middlewares=chain-oauth@file"
+      ## Services
+      - "traefik.http.routers.transmission-secure.service=transmission-svc"
+      - "traefik.http.services.transmission-svc.loadbalancer.server.port=9091"
+
+  # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    #ports:
+    # - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - /mnt/user/appdata/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+    networks:
+      - t2_proxy
+    labels:
+      - "traefik.enable=true" 
+      ## Routers
+      - "traefik.http.routers.prometheus-secure.rule=Host(`prometheus.${DOMAINNAME}`)"
+      - "traefik.http.routers.prometheus-secure.entryPoints=websecure"
+      - "traefik.http.routers.prometheus-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.prometheus-secure.middlewares=chain-oauth@file"
+      ## Services
+      - "traefik.http.routers.prometheus-secure.service=prometheus-svc"
+      - "traefik.http.services.prometheus-svc.loadbalancer.server.port=9090"
       
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    restart: always
+    #ports:
+     #-8316:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+    devices:
+      # Add all devices producing error logs from docker-compose logs cadvisor.
+      - /dev/kmsg
+      - /dev/loop2
+      - /dev/loop3
+      - /dev//mapper/sdc1
+    #privileged: true
+    networks:
+      - t2_proxy
+    labels:
+      - "traefik.enable=true" 
+      ## Routers
+      - "traefik.http.routers.cadvisor-secure.rule=Host(`cadvisor.${DOMAINNAME}`)"
+      - "traefik.http.routers.cadvisor-secure.entryPoints=websecure"
+      - "traefik.http.routers.cadvisor-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.cadvisor-secure.middlewares=chain-oauth@file"
+      ## Services
+      - "traefik.http.routers.cadvisor-secure.service=cadvisor-svc"
+      - "traefik.http.services.cadvisor-svc.loadbalancer.server.port=8080"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+
 volumes:
   letsencrypt:
     # Intentionally blank. Traefik will add an acme.json certificate inside this volume.
