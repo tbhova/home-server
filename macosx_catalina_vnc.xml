@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-  <name>MacinaboxCatalina</name>
+  <name>Mac Catalina VNC</name>
   <uuid>6f94acde-6202-4a64-9df3-3d7cbfdfa96c</uuid>
   <description>MacOS Catalina</description>
   <metadata>
