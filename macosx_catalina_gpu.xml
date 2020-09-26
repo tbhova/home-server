@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
   <name>Mac Catalina GPU</name>
-  <uuid>6f94acde-6202-4a64-9df3-3d7cbfdfa96c</uuid>
+  <uuid>0654cd2d-ab6b-4453-9905-bf22c2902e8a</uuid>
   <description>MacOS Catalina</description>
   <metadata>
     <vmtemplate xmlns="unraid" name="MacOS" icon="/mnt/user/domains/MacinaboxCatalina/icon/catalina.png" os="Catalina"/>
