@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  # TODO update from pi
+  zigbee2mqtt:
+      container_name: zigbee2mqtt:latest
+      image: koenkk/zigbee2mqtt
+      volumes:
+        - ./data:/app/data
+        - /run/udev:/run/udev:ro
+      devices:
+        - /dev/ttyACM0:/dev/ttyACM0
+      restart: always
+      network_mode: host
+      environment:
+        - TZ=America/Los_Angeles
