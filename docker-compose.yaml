@@ -131,7 +131,7 @@ services:
   #    privileged: true
   #    devices:
   #      - /dev/ttyACM0:/dev/ttyACM0
-  #      - /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00:/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00
+  #      #- /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00:/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00
   #    network_mode: host
   #    environment:
   #      - TZ=$TZ
@@ -290,7 +290,7 @@ services:
     environment:
       - TZ=$TZ
       - PLEX_CLAIM=${PLEX_CLAIM_TOKEN}
-      - ADVERTISE_IP=http://192.168.1.100:32400/,https://plex.${DOMAINNAME}
+      - ADVERTISE_IP=http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
     hostname: "PlexServer"
     volumes:
       - /mnt/user/appdata/docker/plex_config:/config
