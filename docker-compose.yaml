@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   # https://docs.traefik.io
+  # https://www.smarthomebeginner.com/my-smart-home-setup-2019/
   traefik:
     # The official v2 Traefik docker image
     image: "traefik:chevrotin"
@@ -58,6 +59,7 @@ services:
     volumes:
       - "./traefik:/etc/traefik:ro" # <== Traefik looks for config at /etc/traefik/traefik.yaml https://docs.traefik.io/getting-started/configuration-overview/#configuration-file
       - "letsencrypt:/letsencrypt" # <== Volume for certs (TLS)
+      # TODO Docker Socket
       - "/var/run/docker.sock:/var/run/docker.sock:ro" # <== So that Traefik can listen to the Docker events.
     labels:
     #### Labels define the behavior and rules of the traefik proxy for this container. ####     
@@ -119,26 +121,78 @@ services:
       - API_KEY=${CLOUDFLARE_API_KEY}
       - ZONE=${DOMAINNAME}
       - PROXIED=true
-      
-  #zigbee2mqtt:
-  #    container_name: zigbee2mqtt
-  #    #image: koenkk/zigbee2mqtt:latest
-  #    image: koenkk/zigbee2mqtt:1.10.0
-  #    restart: always
-  #    volumes:
-  #      - /mnt/user/appdata/docker/zigbee2mqtt:/app/data
-  #      - /run/udev:/run/udev:ro
-  #    privileged: true
-  #    devices:
-  #      - /dev/ttyACM0:/dev/ttyACM0
-  #      #- /dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00:/dev/serial/by-id/usb-Texas_Instruments_TI_CC2531_USB_CDC___0XF83002085054FFFF-if00
-  #    network_mode: host
-  #    environment:
-  #      - TZ=$TZ
-  #      # - PUID=$PUID
-  #      # - PGID=$PGID
-  #      - PUID=0
-  #      - PGID=0
+
+  # https://www.smarthomebeginner.com/traefik-docker-security-best-practices/#9_Use_a_Docker_Socket_Proxy  
+  # Docker Socket Proxy - Security Enchanced Proxy for Docker Socket
+  socket-proxy:
+    container_name: socket-proxy
+    image: tecnativa/docker-socket-proxy
+    restart: always
+    networks:
+      # t2_proxy:
+      socket_proxy:
+        ipv4_address: 192.168.91.254 # You can specify a static IP
+    privileged: true
+    # ports:
+    #  - "2375:2375"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
+      ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
+      # 0 to revoke access.
+      # 1 to grant access.
+      ## Granted by Default
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      ## Revoked by Default
+      # Security critical
+      - AUTH=0
+      - SECRETS=0
+      - POST=1 # Ouroboros
+      # Not always needed
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - CONTAINERS=1 # Traefik, portainer, etc.
+      - DISTRIBUTION=0
+      - EXEC=0
+      - IMAGES=1 # Portainer
+      - INFO=1 # Portainer
+      - NETWORKS=1 # Portainer
+      - NODES=0
+      - PLUGINS=0
+      - SERVICES=1 # Portainer
+      - SESSION=0
+      - SWARM=0
+      - SYSTEM=0
+      - TASKS=1 # Portaienr
+      - VOLUMES=1 # Portainer
+  
+  # https://github.com/htpcBeginner/docker-traefik/blob/e5e1ad70e3a9f6e6fcb5c1d65ea03a55c1f84599/docker-compose-t2.yml
+  # Ouroboros - Automatic Docker Container Updates
+  ouroboros:
+    image: pyouroboros/ouroboros:latest
+    container_name: ouroboros
+    restart: unless-stopped
+    networks:
+      - default
+      - socket_proxy
+    # depends_on:
+    #  - socket-proxy
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead for improved security
+      - $DOCKERDIR/ouroboros/config.json:/root/.docker/config.json:ro
+    environment:
+      TZ: $TZ
+      INTERVAL: 86400
+      LOG_LEVEL: info
+      SELF_UPDATE: "true"
+      CLEANUP: "true"
+      #IGNORE: traefik influxdb addon_core_check_config addon_62c7908d_autobackup plexms
+      #NOTIFIERS: "tgram://$TGRAM_BOT_TOKEN/$TGRAM_CHAT_ID/"
+      DOCKER_SOCKETS: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
       
   # Portainer - WebUI for Containers
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
@@ -146,6 +200,7 @@ services:
     container_name: portainer
     image: portainer/portainer:latest
     restart: always
+    # TODO Docker Socket
     command: -H unix:///var/run/docker.sock
     networks:
       - t2_proxy
@@ -154,8 +209,9 @@ services:
      # ports:
      # - "$PORTAINER_PORT:9000"
     volumes:
+      # TODO Docker Socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/user/appdata/docker/portainer/data:/data 
+      - $DOCKERDIR/portainer/data:/data 
     environment:
       - PUID=$PUID
       - PGID=$PGID
@@ -187,7 +243,7 @@ services:
     # ports:
     #  - "$ORGANIZR_PORT:80"
      volumes:
-       - /mnt/user/appdata/docker/organizr:/config
+       - $DOCKERDIR/organizr:/config
      environment:
        - PUID=$PUID
        - PGID=$PGID
@@ -218,7 +274,7 @@ services:
      ports:
        - "3306:3306"
      volumes:
-       - /mnt/user/appdata/docker/mariadb/data:/config
+       - $DOCKERDIR/mariadb/data:/config
        # TODO
       # - /etc/timezone:/etc/timezone:ro
        - /etc/localtime:/etc/localtime:ro
@@ -293,7 +349,7 @@ services:
       - ADVERTISE_IP=http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
     hostname: "PlexServer"
     volumes:
-      - /mnt/user/appdata/docker/plex_config:/config
+      - $DOCKERDIR/plex_config:/config
       - /mnt/user/appdata/tmp/plex_tmp:/transcode
       - /mnt/user/media:/data
     labels:
@@ -321,6 +377,7 @@ services:
     volumes:
       - "/mnt/user/games/PS3Games:/games:rw"
    
+  # Run all Transmission traffic through VPN Unlimited
   # https://github.com/haugene/docker-transmission-openvpn   
   # https://www.smarthomebeginner.com/docker-home-media-server-2018-basic/#Transmission_with_VPN_-_Bittorrent_Downloader
   transmission-vpn:
@@ -339,7 +396,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # OpenVPN config generated with https://www.vpnunlimitedapp.com/help/manuals/how-to-manually-create-vpn-conf
-      #- /mnt/user/appdata/docker/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/vpnunlimited:ro
+      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/vpnunlimited:ro
       - /mnt/user/downloads/transmission:/data
       - /mnt/user/downloads/transmission/completed:/data/completed
       - /mnt/user/downloads/transmission/incomplete:/data/incomplete
@@ -347,7 +404,7 @@ services:
       - OPENVPN_PROVIDER=VPNUNLIMITED
       - OPENVPN_USERNAME=$VPN_UNLIMITED_USERNAME
       - OPENVPN_PASSWORD=$VPN_UNLIMITED_PASSWORD
-      - OPENVPN_CONFIG=us-sf,ca-tr  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or /mnt/user/appdata/docker/transmission-vpn/vpnunlimited-openvpn
+      - OPENVPN_CONFIG=us-sf,ca-tr  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.1.0/24
       - PUID=${PUID}
@@ -373,7 +430,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - /mnt/user/appdata/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - $DOCKERDIR/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
     networks:
@@ -408,7 +465,8 @@ services:
       - /dev/kmsg
       - /dev/loop2
       - /dev/loop3
-      - /dev//mapper/sdc1
+      # TODO
+      #- /dev//mapper/sdc1
     #privileged: true
     networks:
       - t2_proxy
@@ -445,3 +503,12 @@ networks:
        - subnet: 192.168.90.0/24
        # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/#ipam
        #gateway: 192.168.90.1
+  # Docker socket proxy.
+  # https://www.smarthomebeginner.com/traefik-docker-security-best-practices/#9_Use_a_Docker_Socket_Proxy
+  socket_proxy:
+    name: socket_proxy
+    ipam:
+      config:
+       - subnet: 192.168.91.0/24
+       # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/#ipam
+       #gateway: 192.168.91.1
