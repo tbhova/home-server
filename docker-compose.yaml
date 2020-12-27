@@ -411,7 +411,7 @@ services:
       #- OPENVPN_PROVIDER=CUSTOM
       - OPENVPN_USERNAME=$VPN_UNLIMITED_USERNAME
       - OPENVPN_PASSWORD=$VPN_UNLIMITED_PASSWORD
-      - OPENVPN_CONFIG=us-sf,ca-tr  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
+      - OPENVPN_CONFIG=us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
       - LOCAL_NETWORK=192.168.1.0/24
       - PUID=${PUID}
