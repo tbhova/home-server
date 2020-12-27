@@ -236,7 +236,7 @@ services:
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Organizr_-_Unified_HTPCHome_Server_Web_Interface
   organizr:
      container_name: organizr
-     image: organizrtools/organizr-v2:latest
+     image: organizr/organizr:latest
      restart: always
      networks:
        - t2_proxy
