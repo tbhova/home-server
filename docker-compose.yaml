@@ -383,11 +383,17 @@ services:
   transmission-vpn:
     image: haugene/transmission-openvpn
     container_name: transmission-vpn
+    restart: always
+    networks:
+      # - t2_proxy
+      t2_proxy:
+        ipv4_address: 192.168.90.90
+    # security_opt:
+    #   - no-new-privileges:true
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun
-    restart: always
     ports:
     - "9091:9091"
     dns:
@@ -396,12 +402,13 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # OpenVPN config generated with https://www.vpnunlimitedapp.com/help/manuals/how-to-manually-create-vpn-conf
-      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/vpnunlimited:ro
+      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/custom:ro
+      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn/us-sf.ovpn:/etc/openvpn/custom/default.ovpn:ro
       - /mnt/user/downloads/transmission:/data
-      - /mnt/user/downloads/transmission/completed:/data/completed
-      - /mnt/user/downloads/transmission/incomplete:/data/incomplete
+      - $DOCKERDIR/transmission-vpn/config:/config
     environment:
       - OPENVPN_PROVIDER=VPNUNLIMITED
+      #- OPENVPN_PROVIDER=CUSTOM
       - OPENVPN_USERNAME=$VPN_UNLIMITED_USERNAME
       - OPENVPN_PASSWORD=$VPN_UNLIMITED_PASSWORD
       - OPENVPN_CONFIG=us-sf,ca-tr  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
@@ -411,7 +418,8 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
-      - TRANSMISSION_RPC_HOST_WHITELIST=127.0.0.1,192.168.1.*
+      # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
+      #- TRANSMISSION_RPC_HOST_WHITELIST=127.0.0.1,192.168.1.*
       - TRANSMISSION_RPC_PASSWORD=$TRANSMISSION_WEBUI_PASSWORD
       - TRANSMISSION_RPC_USERNAME=$TRANSMISSION_WEBUI_USERNAME
       - TRANSMISSION_UMASK=022
