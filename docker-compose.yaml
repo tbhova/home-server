@@ -150,7 +150,7 @@ services:
       # Security critical
       - AUTH=0
       - SECRETS=0
-      - POST=1 # Ouroboros
+      - POST=1 # Watchtower
       # Not always needed
       - BUILD=0
       - COMMIT=0
@@ -170,29 +170,31 @@ services:
       - TASKS=1 # Portaienr
       - VOLUMES=1 # Portainer
   
-  # https://github.com/htpcBeginner/docker-traefik/blob/e5e1ad70e3a9f6e6fcb5c1d65ea03a55c1f84599/docker-compose-t2.yml
-  # Ouroboros - Automatic Docker Container Updates
-  ouroboros:
-    image: pyouroboros/ouroboros:latest
-    container_name: ouroboros
+  # Watchtower - Automatic Docker Container Updates
+  # Ouroboros is no longer maintained.
+  # https://github.com/containrrr/watchtower
+  # https://codeopolis.com/posts/use-watchtower-to-automate-docker-container-updates/
+  # Set label com.centurylinklabs.watchtower.enable set to false to disable update checking for each container.
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
     restart: unless-stopped
     networks:
       - default
       - socket_proxy
     # depends_on:
     #  - socket-proxy
-    volumes:
+    # volumes:
       # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead for improved security
-      - $DOCKERDIR/ouroboros/config.json:/root/.docker/config.json:ro
+      # Docker's config.json
+      #- /home/<user>/.docker/config.json:/config.json
     environment:
       TZ: $TZ
-      INTERVAL: 86400
-      LOG_LEVEL: info
-      SELF_UPDATE: "true"
-      CLEANUP: "true"
-      #IGNORE: traefik influxdb addon_core_check_config addon_62c7908d_autobackup plexms
-      #NOTIFIERS: "tgram://$TGRAM_BOT_TOKEN/$TGRAM_CHAT_ID/"
-      DOCKER_SOCKETS: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
+      WATCHTOWER_CLEANUP: "true" # Delete old images
+      WATCHTOWER_INCLUDE_STOPPED: "true" # Upgrade stopped containers too.
+      DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
+      #WATCHTOWER_POLL_INTERVAL: 60 # 86400 # Check for updates interval in seconds.
+      #WATCHTOWER_TRACE: "true"
       
   # Portainer - WebUI for Containers
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
