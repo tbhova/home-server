@@ -10,10 +10,10 @@ services:
     restart: always
     environment:
       # https://docs.traefik.io/https/acme/#providers
-      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_KEY}
-      - TZ=$TZ
-      - PUID=$PUID
-      - PGID=$PGID
+      CF_DNS_API_TOKEN: ${CLOUDFLARE_API_KEY}
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
     command:
     #### These are the CLI commands that will configure Traefik and tell it how to work! ####
       ## API Settings - https://docs.traefik.io/operations/api/, endpoints - https://docs.traefik.io/operations/api/#endpoints ##
@@ -86,18 +86,18 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-      - TZ=$TZ
-      - PROVIDERS_GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
-      - PROVIDERS_GOOGLE_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
-      - SECRET=${OAUTH_SECRET}
-      - COOKIE_DOMAIN=${DOMAINNAME}
-      - INSECURE_COOKIE="false"
-      - AUTH_HOST=oauth.${DOMAINNAME}
-      - URL_PATH=/_oauth
-      - WHITELIST=$EMAILS
-      - LOG_LEVEL=info
-      - LOG_FORMAT=text
-      - LIFETIME=2592000 # 30 days
+      TZ: $TZ
+      PROVIDERS_GOOGLE_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      PROVIDERS_GOOGLE_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      SECRET: ${OAUTH_SECRET}
+      COOKIE_DOMAIN: ${DOMAINNAME}
+      INSECURE_COOKIE: "false"
+      AUTH_HOST: oauth.${DOMAINNAME}
+      URL_PATH: /_oauth
+      WHITELIST: $EMAILS
+      LOG_LEVEL: info
+      LOG_FORMAT: text
+      LIFETIME: 2592000 # 30 days
     labels:
       - "traefik.enable=true" 
      ## HTTP Routers
@@ -117,10 +117,10 @@ services:
     container_name: "cloudflare-ddns"
     restart: always
     environment:
-      - TZ=$TZ
-      - API_KEY=${CLOUDFLARE_API_KEY}
-      - ZONE=${DOMAINNAME}
-      - PROXIED=true
+      TZ: $TZ
+      API_KEY: ${CLOUDFLARE_API_KEY}
+      ZONE: ${DOMAINNAME}
+      PROXIED: "true"
 
   # https://www.smarthomebeginner.com/traefik-docker-security-best-practices/#9_Use_a_Docker_Socket_Proxy  
   # Docker Socket Proxy - Security Enchanced Proxy for Docker Socket
@@ -138,37 +138,37 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
-      - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
+      LOG_LEVEL: info # debug,info,notice,warning,err,crit,alert,emerg
       ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
       # 0 to revoke access.
       # 1 to grant access.
       ## Granted by Default
-      - EVENTS=1
-      - PING=1
-      - VERSION=1
+      EVENTS: 1
+      PING: 1
+      VERSION: 1
       ## Revoked by Default
       # Security critical
-      - AUTH=0
-      - SECRETS=0
-      - POST=1 # Watchtower
+      AUTH: 0
+      SECRETS: 0
+      POST: 1 # Watchtower
       # Not always needed
-      - BUILD=0
-      - COMMIT=0
-      - CONFIGS=0
-      - CONTAINERS=1 # Traefik, portainer, etc.
-      - DISTRIBUTION=0
-      - EXEC=0
-      - IMAGES=1 # Portainer
-      - INFO=1 # Portainer
-      - NETWORKS=1 # Portainer
-      - NODES=0
-      - PLUGINS=0
-      - SERVICES=1 # Portainer
-      - SESSION=0
-      - SWARM=0
-      - SYSTEM=0
-      - TASKS=1 # Portaienr
-      - VOLUMES=1 # Portainer
+      BUILD: 0
+      COMMIT: 0
+      CONFIGS: 0
+      CONTAINERS: 1 # Traefik, portainer, etc.
+      DISTRIBUTION: 0
+      EXEC: 0
+      IMAGES: 1 # Portainer
+      INFO: 1 # Portainer
+      NETWORKS: 1 # Portainer
+      NODES: 0
+      PLUGINS: 0
+      SERVICES: 1 # Portainer
+      SESSION: 0
+      SWARM: 0
+      SYSTEM: 0
+      TASKS: 1 # Portaienr
+      VOLUMES: 1 # Portainer
   
   # Watchtower - Automatic Docker Container Updates
   # Ouroboros is no longer maintained.
@@ -215,9 +215,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - $DOCKERDIR/portainer/data:/data 
     environment:
-      - PUID=$PUID
-      - PGID=$PGID
-      - TZ=$TZ
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
     labels:
       - "traefik.enable=true"
       ## HTTP Routers
@@ -247,9 +247,9 @@ services:
      volumes:
        - $DOCKERDIR/organizr:/config
      environment:
-       - PUID=$PUID
-       - PGID=$PGID
-       - TZ=$TZ
+       PUID: $PUID
+       PGID: $PGID
+       TZ: $TZ
      labels:
        - "traefik.enable=true"
        ## HTTP Routers
@@ -281,9 +281,9 @@ services:
       # - /etc/timezone:/etc/timezone:ro
        - /etc/localtime:/etc/localtime:ro
      environment:
-       - PUID=$PUID
-       - PGID=$PGID
-       - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+       PUID: $PUID
+       PGID: $PGID
+       MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
 
   # Guacamole - Remote desktop, SSH, on Telnet on any HTML5 Browser 
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Guacamole_-_HTML_5_based_Remote_desktop_SSH_on_Telnet_Gateway
@@ -346,11 +346,11 @@ services:
      - 32413:32413/udp # GDM network discovery
      - 32414:32414/udp # GDM network discovery
     environment:
-      - TZ=$TZ
-      - PLEX_CLAIM=${PLEX_CLAIM_TOKEN}
-      - PLEX_UID=$PUID
-      - PLEX_GID=$PGID
-      - ADVERTISE_IP=http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
+      TZ: $TZ
+      PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
+      PLEX_UID: $PUID
+      PLEX_GID: $PGID
+      ADVERTISE_IP: http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
     hostname: "PlexServer"
     volumes:
       - $DOCKERDIR/plex_config:/config
@@ -373,9 +373,9 @@ services:
     image: shawly/ps3netsrv
     container_name: ps3netsrv
     environment:
-      - TZ=$TZ
-      - USER_ID=$PUID
-      - GROUP_ID=$PGID
+      TZ: $TZ
+      USER_ID: $PUID
+      GROUP_ID: $PGID
     ports:
       - "38008:38008"
     volumes:
@@ -411,26 +411,26 @@ services:
       - /mnt/user/downloads/transmission:/data
       - $DOCKERDIR/transmission-vpn/config:/config
     environment:
-      - OPENVPN_PROVIDER=VPNUNLIMITED
-      #- OPENVPN_PROVIDER=CUSTOM
-      - OPENVPN_USERNAME=$VPN_UNLIMITED_USERNAME
-      - OPENVPN_PASSWORD=$VPN_UNLIMITED_PASSWORD
-      - OPENVPN_CONFIG=us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
-      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
-      - LOCAL_NETWORK=192.168.1.0/24
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
+      OPENVPN_PROVIDER: VPNUNLIMITED
+      #OPENVPN_PROVIDER: CUSTOM
+      OPENVPN_USERNAME: $VPN_UNLIMITED_USERNAME
+      OPENVPN_PASSWORD: $VPN_UNLIMITED_PASSWORD
+      OPENVPN_CONFIG: us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
+      OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
+      LOCAL_NETWORK: 192.168.1.0/24
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
       # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
-      #- TRANSMISSION_RPC_HOST_WHITELIST=127.0.0.1,192.168.1.*
-      - TRANSMISSION_RPC_PASSWORD=$TRANSMISSION_WEBUI_PASSWORD
-      - TRANSMISSION_RPC_USERNAME=$TRANSMISSION_WEBUI_USERNAME
-      - TRANSMISSION_UMASK=022
-      - TRANSMISSION_SPEED_LIMIT_UP=225 #KB/s
-      - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
-      #- TRANSMISSION_RATIO_LIMIT=2.00
-      #- TRANSMISSION_RATIO_LIMIT_ENABLED=false
+      #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,192.168.1.*
+      TRANSMISSION_RPC_PASSWORD: $TRANSMISSION_WEBUI_PASSWORD
+      TRANSMISSION_RPC_USERNAME: $TRANSMISSION_WEBUI_USERNAME
+      TRANSMISSION_UMASK: 022
+      TRANSMISSION_SPEED_LIMIT_UP: 225 #KB/s
+      TRANSMISSION_SPEED_LIMIT_UP_ENABLED: "true"
+      #TRANSMISSION_RATIO_LIMIT=2.00
+      #TRANSMISSION_RATIO_LIMIT_ENABLED=false
 
   # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
   prometheus:
