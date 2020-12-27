@@ -197,22 +197,22 @@ services:
       #WATCHTOWER_TRACE: "true"
       
   # Portainer - WebUI for Containers
+  # https://github.com/portainer/portainer-compose/blob/master/traefik/docker-compose.yml
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
   portainer:
     container_name: portainer
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce:latest
     restart: always
-    # TODO Docker Socket
-    command: -H unix:///var/run/docker.sock
+    command: -H tcp://socket-proxy:2375
     networks:
       - t2_proxy
+      - socket_proxy
     security_opt:
       - no-new-privileges:true
      # ports:
      # - "$PORTAINER_PORT:9000"
     volumes:
-      # TODO Docker Socket
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      #- /var/run/docker.sock:/var/run/docker.sock:ro # Use Docker Socket Proxy instead for improved security
       - $DOCKERDIR/portainer/data:/data 
     environment:
       PUID: $PUID
@@ -220,6 +220,7 @@ services:
       TZ: $TZ
     labels:
       - "traefik.enable=true"
+      ## Portainer
       ## HTTP Routers
       - "traefik.http.routers.portainer-secure.entrypoints=websecure"
       - "traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAINNAME}`)"
@@ -231,6 +232,18 @@ services:
       ## HTTP Services
       - "traefik.http.routers.portainer-secure.service=portainer-svc"
       - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+      ## Edge
+      ## HTTP Routers
+      - "traefik.http.routers.edge-secure.entrypoints=websecure"
+      - "traefik.http.routers.edge-secure.rule=Host(`edge.${DOMAINNAME}`)"
+      - "traefik.http.routers.edge-secure.tls=true"
+      ## Middlewares
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file" # No Authentication
+      # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file" # Basic Authentication
+      - "traefik.http.routers.edge-secure.middlewares=chain-oauth@file" # Google OAuth 2.0
+      ## HTTP Services
+      - "traefik.http.routers.edge-secure.service=edge"
+      - "traefik.http.services.edge.loadbalancer.server.port=8000"
       
   # Organizr - Unified frontent with a directory for all ports and services
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Organizr_-_Unified_HTPCHome_Server_Web_Interface
