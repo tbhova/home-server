@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+
+  ################################ Docker and backbone services
+
+  # Traefik 2 - Reverse Proxy
   # https://docs.traefik.io
   # https://www.smarthomebeginner.com/my-smart-home-setup-2019/
   traefik:
@@ -260,7 +264,222 @@ services:
       ## HTTP Services
       - "traefik.http.routers.edge-secure.service=edge"
       - "traefik.http.services.edge.loadbalancer.server.port=8000"
+  
+  ################################ Media  
+
+  # https://github.com/plexinc/pms-docker/blob/master/docker-compose-bridge.yml.template
+  plex:
+    image: plexinc/pms-docker:public
+    container_name: plex
+    restart: always
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    ports: # https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
+     - 32400:32400/tcp # Primary
+     #- 3005:3005/tcp # Plex Home Theater Companion
+     #- 8324:8324/tcp # Plex Roku Companion
+     - 32469:32469/tcp # Plex DLNA Server
+     - 1900:1900/udp # Plex DLNA Server
+     - 32410:32410/udp # GDM network discovery
+     - 32412:32412/udp # GDM network discovery
+     - 32413:32413/udp # GDM network discovery
+     - 32414:32414/udp # GDM network discovery
+    environment:
+      TZ: $TZ
+      PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
+      PLEX_UID: $PUID
+      PLEX_GID: $PGID
+      ADVERTISE_IP: http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
+    hostname: "PlexServer"
+    volumes:
+      - $DOCKERDIR/plex_config:/config
+      - /mnt/user/appdata/tmp/plex_tmp:/transcode
+      - /mnt/user/media:/data
+    labels:
+      - "traefik.enable=true" 
+      ## Routers
+      - "traefik.http.routers.plex-secure.rule=Host(`plex.${DOMAINNAME}`)"
+      - "traefik.http.routers.plex-secure.entryPoints=websecure"
+      - "traefik.http.routers.plex-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.plex-secure.middlewares=chain-no-auth@file"
+      ## Services
+      - "traefik.http.routers.plex-secure.service=plexms-svc"
+      - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
+
+  # Calibre-web UI – Ebooks and Management (Plex of Ebooks)
+  # Set up: https://www.atlantic.net/vps-hosting/how-to-install-calibre-web-on-ubuntu-20-04-with-docker/
+  calibre-web:
+    image: linuxserver/calibre-web
+    container_name: calibre-web
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    #ports:
+    #  - 8083:8083
+    volumes:
+      - $DOCKERDIR/calibre-web:/config
+      - /mnt/user/media/Calibre:/books:rw
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+      DOCKER_MODS: linuxserver/calibre-web:calibre # set the path to converter tool to /app/calibre/ebook-convert
+      UMASK: 002
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.calibre-web-secure.rule=Host(`calweb.$DOMAINNAME`)"
+      - "traefik.http.routers.calibre-web-secure.entryPoints=websecure"
+      - "traefik.http.routers.calibre-web-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.calibre-web-secure.middlewares=chain-oauth@file" 
+      ## HTTP Services
+      - "traefik.http.routers.calibre-web-secure.service=calibre-web-svc"
+      - "traefik.http.services.calibre-web-svc.loadbalancer.server.port=8083"
       
+  # Very simple Calibre UI
+  cops:
+    image: ghcr.io/linuxserver/cops
+    container_name: cops
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    #ports:
+    #  - 8085:80
+    volumes:
+      - $DOCKERDIR/cops/:/config
+      - /mnt/user/media/Calibre:/books
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.cops-secure.rule=Host(`cops.$DOMAINNAME`)"
+      - "traefik.http.routers.cops-secure.entryPoints=websecure"
+      - "traefik.http.routers.cops-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.cops-secure.middlewares=chain-oauth@file" 
+      ## HTTP Services
+      - "traefik.http.routers.cops-secure.service=cops-svc"
+      - "traefik.http.services.cops-svc.loadbalancer.server.port=80"
+
+  # Calibre  – Ebooks and Management (Server)
+  calibre:
+    image: linuxserver/calibre
+    container_name: calibre
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    #ports:
+    #  - "8084:8080" # Desktop GUI
+    #  - "8081:8081" # Webserver GUI
+    volumes:
+      - $DOCKERDIR/calibre:/config:rw
+      - /mnt/user/media/Calibre:/config/Calibre Library:rw
+      #- /mnt/user/downloads/Calibre:/downloads:rw
+      - /mnt/user/media/Books:/downloads:rw
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+      # GUAC_USER: abc #Gucamole user optional
+      # GUAC_PASS: 900150983cd24fb0d6963f7d28e17f72 #Guacamole password optional
+      UMASK_SET: 002 #optional
+      # CLI_ARGS: #optional
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.calibre-secure.rule=Host(`calibre.$DOMAINNAME`)"
+      - "traefik.http.routers.calibre-secure.entryPoints=websecure"
+      - "traefik.http.routers.calibre-secure.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.calibre-secure.middlewares=chain-oauth@file" 
+      ## HTTP Services
+      - "traefik.http.routers.calibre-secure.service=calibre-svc"
+      - "traefik.http.services.calibre-svc.loadbalancer.server.port=8080"
+
+  
+  ################################ Downloads
+  
+  # Run all Transmission traffic through VPN Unlimited
+  # https://github.com/haugene/docker-transmission-openvpn   
+  # https://www.smarthomebeginner.com/docker-home-media-server-2018-basic/#Transmission_with_VPN_-_Bittorrent_Downloader
+  transmission-vpn:
+    image: haugene/transmission-openvpn
+    container_name: transmission-vpn
+    restart: always
+    networks:
+      # - t2_proxy
+      t2_proxy:
+        ipv4_address: 192.168.90.90
+    # security_opt:
+    #   - no-new-privileges:true
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    ports:
+    - "9091:9091"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # OpenVPN config generated with https://www.vpnunlimitedapp.com/help/manuals/how-to-manually-create-vpn-conf
+      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/custom:ro
+      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn/us-sf.ovpn:/etc/openvpn/custom/default.ovpn:ro
+      - /mnt/user/downloads/transmission:/data
+      - $DOCKERDIR/transmission-vpn/config:/config
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      OPENVPN_PROVIDER: VPNUNLIMITED
+      #OPENVPN_PROVIDER: CUSTOM
+      OPENVPN_USERNAME: $VPN_UNLIMITED_USERNAME
+      OPENVPN_PASSWORD: $VPN_UNLIMITED_PASSWORD
+      OPENVPN_CONFIG: us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
+      OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
+      LOCAL_NETWORK: 192.168.1.0/24
+      TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
+      # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
+      #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,192.168.1.*
+      TRANSMISSION_RPC_PASSWORD: $TRANSMISSION_WEBUI_PASSWORD
+      TRANSMISSION_RPC_USERNAME: $TRANSMISSION_WEBUI_USERNAME
+      TRANSMISSION_UMASK: 002
+      TRANSMISSION_SPEED_LIMIT_UP: 225 #KB/s
+      TRANSMISSION_SPEED_LIMIT_UP_ENABLED: "true"
+      #TRANSMISSION_RATIO_LIMIT=2.00
+      #TRANSMISSION_RATIO_LIMIT_ENABLED=false
+
+  # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
+  
+  ################################ TODO: Work in Progress
+  
+  # https://github.com/shawly/docker-ps3netsrv
+  ps3netsrv:
+    image: shawly/ps3netsrv
+    container_name: ps3netsrv
+    environment:
+      TZ: $TZ
+      USER_ID: $PUID
+      GROUP_ID: $PGID
+    ports:
+      - "38008:38008"
+    volumes:
+      - "/mnt/user/games/PS3Games:/games:rw"
+  
   # Organizr - Unified frontent with a directory for all ports and services
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Organizr_-_Unified_HTPCHome_Server_Web_Interface
   organizr:
@@ -362,114 +581,6 @@ services:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
-
-  # https://github.com/plexinc/pms-docker/blob/master/docker-compose-bridge.yml.template
-  plex:
-    image: plexinc/pms-docker:public
-    container_name: plex
-    restart: always
-    networks:
-      - t2_proxy
-    security_opt:
-      - no-new-privileges:true
-    ports: # https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
-     - 32400:32400/tcp # Primary
-     #- 3005:3005/tcp # Plex Home Theater Companion
-     #- 8324:8324/tcp # Plex Roku Companion
-     - 32469:32469/tcp # Plex DLNA Server
-     - 1900:1900/udp # Plex DLNA Server
-     - 32410:32410/udp # GDM network discovery
-     - 32412:32412/udp # GDM network discovery
-     - 32413:32413/udp # GDM network discovery
-     - 32414:32414/udp # GDM network discovery
-    environment:
-      TZ: $TZ
-      PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
-      PLEX_UID: $PUID
-      PLEX_GID: $PGID
-      ADVERTISE_IP: http://192.168.1.254:32400/,https://plex.${DOMAINNAME}
-    hostname: "PlexServer"
-    volumes:
-      - $DOCKERDIR/plex_config:/config
-      - /mnt/user/appdata/tmp/plex_tmp:/transcode
-      - /mnt/user/media:/data
-    labels:
-      - "traefik.enable=true" 
-      ## Routers
-      - "traefik.http.routers.plex-secure.rule=Host(`plex.${DOMAINNAME}`)"
-      - "traefik.http.routers.plex-secure.entryPoints=websecure"
-      - "traefik.http.routers.plex-secure.tls=true"
-      ## Middlewares
-      - "traefik.http.routers.plex-secure.middlewares=chain-no-auth@file"
-      ## Services
-      - "traefik.http.routers.plex-secure.service=plexms-svc"
-      - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
-
-  # https://github.com/shawly/docker-ps3netsrv
-  ps3netsrv:
-    image: shawly/ps3netsrv
-    container_name: ps3netsrv
-    environment:
-      TZ: $TZ
-      USER_ID: $PUID
-      GROUP_ID: $PGID
-    ports:
-      - "38008:38008"
-    volumes:
-      - "/mnt/user/games/PS3Games:/games:rw"
-   
-  # Run all Transmission traffic through VPN Unlimited
-  # https://github.com/haugene/docker-transmission-openvpn   
-  # https://www.smarthomebeginner.com/docker-home-media-server-2018-basic/#Transmission_with_VPN_-_Bittorrent_Downloader
-  transmission-vpn:
-    image: haugene/transmission-openvpn
-    container_name: transmission-vpn
-    restart: always
-    networks:
-      # - t2_proxy
-      t2_proxy:
-        ipv4_address: 192.168.90.90
-    # security_opt:
-    #   - no-new-privileges:true
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    ports:
-    - "9091:9091"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      # OpenVPN config generated with https://www.vpnunlimitedapp.com/help/manuals/how-to-manually-create-vpn-conf
-      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/custom:ro
-      #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn/us-sf.ovpn:/etc/openvpn/custom/default.ovpn:ro
-      - /mnt/user/downloads/transmission:/data
-      - $DOCKERDIR/transmission-vpn/config:/config
-    environment:
-      TZ: $TZ
-      PUID: $PUID
-      PGID: $PGID
-      OPENVPN_PROVIDER: VPNUNLIMITED
-      #OPENVPN_PROVIDER: CUSTOM
-      OPENVPN_USERNAME: $VPN_UNLIMITED_USERNAME
-      OPENVPN_PASSWORD: $VPN_UNLIMITED_PASSWORD
-      OPENVPN_CONFIG: us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
-      OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
-      LOCAL_NETWORK: 192.168.1.0/24
-      TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
-      # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
-      #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,192.168.1.*
-      TRANSMISSION_RPC_PASSWORD: $TRANSMISSION_WEBUI_PASSWORD
-      TRANSMISSION_RPC_USERNAME: $TRANSMISSION_WEBUI_USERNAME
-      TRANSMISSION_UMASK: 022
-      TRANSMISSION_SPEED_LIMIT_UP: 225 #KB/s
-      TRANSMISSION_SPEED_LIMIT_UP_ENABLED: "true"
-      #TRANSMISSION_RATIO_LIMIT=2.00
-      #TRANSMISSION_RATIO_LIMIT_ENABLED=false
-
-  # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
