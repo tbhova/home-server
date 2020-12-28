@@ -23,6 +23,7 @@ services:
       - "--log.level=INFO"
       ## Provider Settings - https://docs.traefik.io/providers/docker/#provider-configuration ##
       - "--providers.docker=true" # <== Enabling docker as the provider for traefik
+      - "--providers.docker.endpoint=tcp://socket-proxy:2375"  # Use docker socket proxy for better security.
       - "--providers.docker.exposedbydefault=false" # <== Don't expose every container to traefik, only expose enabled ones
       - "--providers.docker.network=t2_proxy"
       - "--providers.file=true" # Enable file provider for services hosted outside of docker compose.
@@ -51,6 +52,9 @@ services:
      #    ipv4_address: 192.168.90.254 # You can specify a static IP
     networks:
       - t2_proxy
+      - socket_proxy
+    depends_on:
+      - socket-proxy
     security_opt:
       - no-new-privileges:true
     ports:
@@ -59,8 +63,7 @@ services:
     volumes:
       - "./traefik:/etc/traefik:ro" # <== Traefik looks for config at /etc/traefik/traefik.yaml https://docs.traefik.io/getting-started/configuration-overview/#configuration-file
       - "letsencrypt:/letsencrypt" # <== Volume for certs (TLS)
-      # TODO Docker Socket
-      - "/var/run/docker.sock:/var/run/docker.sock:ro" # <== So that Traefik can listen to the Docker events.
+      # - "/var/run/docker.sock:/var/run/docker.sock:ro" # <== So that Traefik can listen to the Docker events. # Use docker socket proxy for better security.
     labels:
     #### Labels define the behavior and rules of the traefik proxy for this container. ####     
       - "traefik.enable=true" # <== Enable traefik on itself to view dashboard and assign subdomain to view it
