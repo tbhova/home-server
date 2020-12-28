@@ -463,7 +463,6 @@ services:
       #TRANSMISSION_RATIO_LIMIT=2.00
       #TRANSMISSION_RATIO_LIMIT_ENABLED=false
 
-  # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
   
   ################################ TODO: Work in Progress
   
@@ -581,6 +580,7 @@ services:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -611,6 +611,7 @@ services:
       - "traefik.http.routers.prometheus-secure.service=prometheus-svc"
       - "traefik.http.services.prometheus-svc.loadbalancer.server.port=9090"
       
+  # https://prometheus.io/docs/guides/cadvisor/#docker-compose-configuration
   cadvisor:
     image: google/cadvisor:latest
     container_name: cadvisor
