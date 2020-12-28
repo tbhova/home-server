@@ -87,6 +87,8 @@ services:
       - no-new-privileges:true
     environment:
       TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       PROVIDERS_GOOGLE_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
       PROVIDERS_GOOGLE_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
       SECRET: ${OAUTH_SECRET}
@@ -118,6 +120,8 @@ services:
     restart: always
     environment:
       TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       API_KEY: ${CLOUDFLARE_API_KEY}
       ZONE: ${DOMAINNAME}
       PROXIED: "true"
@@ -138,6 +142,9 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       LOG_LEVEL: info # debug,info,notice,warning,err,crit,alert,emerg
       ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
       # 0 to revoke access.
@@ -190,6 +197,8 @@ services:
       #- /home/<user>/.docker/config.json:/config.json
     environment:
       TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       WATCHTOWER_CLEANUP: "true" # Delete old images
       WATCHTOWER_INCLUDE_STOPPED: "true" # Upgrade stopped containers too.
       DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
@@ -219,9 +228,9 @@ services:
       #- /var/run/docker.sock:/var/run/docker.sock:ro # Use Docker Socket Proxy instead for improved security
       - $DOCKERDIR/portainer/data:/data 
     environment:
+      TZ: $TZ
       PUID: $PUID
       PGID: $PGID
-      TZ: $TZ
     labels:
       - "traefik.enable=true"
       ## Portainer
@@ -264,9 +273,9 @@ services:
      volumes:
        - $DOCKERDIR/organizr:/config
      environment:
+       TZ: $TZ
        PUID: $PUID
        PGID: $PGID
-       TZ: $TZ
      labels:
        - "traefik.enable=true"
        ## HTTP Routers
@@ -298,6 +307,7 @@ services:
       # - /etc/timezone:/etc/timezone:ro
        - /etc/localtime:/etc/localtime:ro
      environment:
+       TZ: $TZ
        PUID: $PUID
        PGID: $PGID
        MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
@@ -316,6 +326,9 @@ services:
     #ports:
     #  - "$GUACAMOLE_PORT:8080"
     environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       GUACD_HOSTNAME: guacd
       MYSQL_HOSTNAME: 192.168.90.250 
       MYSQL_PORT: 3306
@@ -342,6 +355,10 @@ services:
     restart: always
     security_opt:
       - no-new-privileges:true
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
 
   # https://github.com/plexinc/pms-docker/blob/master/docker-compose-bridge.yml.template
   plex:
@@ -428,6 +445,9 @@ services:
       - /mnt/user/downloads/transmission:/data
       - $DOCKERDIR/transmission-vpn/config:/config
     environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       OPENVPN_PROVIDER: VPNUNLIMITED
       #OPENVPN_PROVIDER: CUSTOM
       OPENVPN_USERNAME: $VPN_UNLIMITED_USERNAME
@@ -435,9 +455,6 @@ services:
       OPENVPN_CONFIG: us-sf,ca-tr,fr,lu,ro  # Corresponds to a file name in https://github.com/haugene/docker-transmission-openvpn/tree/master/openvpn/vpnunlimited or $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn
       OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
       LOCAL_NETWORK: 192.168.1.0/24
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
       TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
       # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
       #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,192.168.1.*
@@ -464,6 +481,10 @@ services:
       - cadvisor
     networks:
       - t2_proxy
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
     labels:
       - "traefik.enable=true" 
       ## Routers
@@ -499,6 +520,10 @@ services:
     #privileged: true
     networks:
       - t2_proxy
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
     labels:
       - "traefik.enable=true" 
       ## Routers
@@ -517,6 +542,10 @@ services:
     restart: always
     ports:
       - 6379:6379
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
 
 volumes:
   letsencrypt:
