@@ -387,8 +387,8 @@ services:
     volumes:
       - $DOCKERDIR/calibre:/config:rw
       - /mnt/user/media/Calibre:/config/Calibre Library:rw
-      #- /mnt/user/downloads/Calibre:/downloads:rw
-      - /mnt/user/media/Books:/downloads:rw
+      - /mnt/user/downloads/completed:/downloads:rw
+      - /mnt/user/media/Books:/books:rw
     environment:
       PUID: $PUID
       PGID: $PGID
@@ -439,7 +439,7 @@ services:
       # OpenVPN config generated with https://www.vpnunlimitedapp.com/help/manuals/how-to-manually-create-vpn-conf
       #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn:/etc/openvpn/custom:ro
       #- $DOCKERDIR/transmission-vpn/vpnunlimited-openvpn/us-sf.ovpn:/etc/openvpn/custom/default.ovpn:ro
-      - /mnt/user/downloads/transmission:/data
+      - /mnt/user/downloads:/data
       - $DOCKERDIR/transmission-vpn/config:/config
     environment:
       TZ: $TZ
@@ -481,9 +481,9 @@ services:
       - "9089:8080"
     volumes:
       - $DOCKERDIR/sabnzbd:/config
-      - /mnt/user/downloads/SABnzbd/complete:/downloads
-      - /mnt/user/downloads/SABnzbd/incomplete:/incomplete-downloads # optional
-      - /mnt/user/downloads/SABnzbd/watch:/watch # optional
+      - /mnt/user/downloads/completed:/downloads
+      - /mnt/user/downloads/incomplete:/incomplete-downloads # optional
+      - /mnt/user/downloads/watch:/watch # optional
     environment:
       TZ: $TZ
       PUID: $PUID
@@ -512,6 +512,7 @@ services:
   ################################ Managers
   
   # Lazylibrarian  – Ebooks and Management
+  # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2.yml
   lazylibrarian:
     image: linuxserver/lazylibrarian
     container_name: lazylibrarian
@@ -524,7 +525,7 @@ services:
     # - "5299:5299"
     volumes:
       - $DOCKERDIR/lazylibrarian:/config
-      - /mnt/user/downloads/:/downloads
+      - /mnt/user/downloads:/downloads
       # - /media:/nas
       - /mnt/user/media/Calibre:/books:rw
       - /etc/localtime:/etc/localtime:ro
