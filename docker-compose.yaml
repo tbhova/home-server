@@ -511,6 +511,48 @@ services:
       
   ################################ Managers
   
+  # Sonarr - TV Shows management
+  # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2.yml
+  sonarr:
+    # image: aront/sonarr  #for mp4_automator support
+    image: linuxserver/sonarr:latest #preview
+    container_name: sonarr
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    #ports:
+    #  - "8989:8989"
+    volumes:
+      - $DOCKERDIR/sonarr:/config
+      - /mnt/user/downloads:/downloads
+      - /mnt/user/media/TV:/tv
+      - "/etc/localtime:/etc/localtime:ro"
+    #   - "$DOCKERDIR/shared/mp4_automator:/config_mp4_automator:rw"
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers Auth Bypass
+      #- "traefik.http.routers.sonarr-rtr-bypass.entrypoints=https"
+      #- "traefik.http.routers.sonarr-rtr-bypass.rule=Host(`sonarr.$DOMAINNAME`) && (Headers(`X-Api-Key`, `$SONARR_API_KEY`) || Query(`apikey`, `$SONARR_API_KEY`))"
+      #- "traefik.http.routers.sonarr-rtr-bypass.priority=100"
+      ## HTTP Routers Auth
+      - "traefik.http.routers.sonarr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAINNAME`)"
+      - "traefik.http.routers.sonarr-rtr.priority=99"
+      - "traefik.http.routers.sonarr-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.sonarr-rtr-bypass.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.sonarr-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
+      #- "traefik.http.routers.sonarr-rtr-bypass.service=sonarr-svc"
+      - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
+  
   # Lazylibrarian  – Ebooks and Management
   # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2.yml
   lazylibrarian:
