@@ -481,8 +481,7 @@ services:
       - "9089:8080"
     volumes:
       - $DOCKERDIR/sabnzbd:/config
-      - /mnt/user/downloads/completed:/downloads
-      - /mnt/user/downloads/incomplete:/incomplete-downloads # optional
+      - /mnt/user/downloads:/config/Downloads
       - /mnt/user/downloads/watch:/watch # optional
     environment:
       TZ: $TZ
@@ -560,10 +559,10 @@ services:
       - "7878:7878"
     volumes:
       - $DOCKERDIR/radarr:/config
-      - /mnt/user/downloads:/downloads
+      - /mnt/user/downloads/movies:/config/Downloads/movies
       - /mnt/user/media/Movies:/movies
       # - $DOCKERDIR/shared/mp4_automator:/config_mp4_automator
-      - "/etc/localtime:/etc/localtime:ro"
+      - /etc/localtime:/etc/localtime:ro
     environment:
       PUID: $PUID
       PGID: $PGID
@@ -636,14 +635,15 @@ services:
       - "8989:8989"
     volumes:
       - $DOCKERDIR/sonarr:/config
-      - /mnt/user/downloads:/downloads
+      - /mnt/user/downloads/tv:/downloads
       - /mnt/user/media/TV:/tv
-      - "/etc/localtime:/etc/localtime:ro"
+      - /etc/localtime:/etc/localtime:ro
     #   - "$DOCKERDIR/shared/mp4_automator:/config_mp4_automator:rw"
     environment:
       PUID: $PUID
       PGID: $PGID
       TZ: $TZ
+      UMASK_SET: 002 #optional
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth Bypass
@@ -677,8 +677,7 @@ services:
     # - "5299:5299"
     volumes:
       - $DOCKERDIR/lazylibrarian:/config
-      - /mnt/user/downloads:/downloads
-      # - /media:/nas
+      - /mnt/user/downloads/complete:/downloads
       - /mnt/user/media/Calibre:/books:rw
       - /etc/localtime:/etc/localtime:ro
     environment:
