@@ -211,6 +211,30 @@ services:
       DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
       #WATCHTOWER_POLL_INTERVAL: 60 # 86400 # Check for updates interval in seconds.
       #WATCHTOWER_TRACE: "true"
+
+  # Docker-GC - Automatic Docker Garbage Collection
+  # Create docker-gc-exclude file
+  # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2.yml
+  dockergc:
+    image: clockworksoul/docker-gc-cron:latest
+    container_name: docker-gc
+    restart: unless-stopped
+    networks:
+      - socket_proxy
+    depends_on:
+      - socket-proxy
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead for improved security
+      - $DOCKERDIR/docker-gc/docker-gc-exclude:/etc/docker-gc-exclude
+    environment:
+      CRON: 0 0 0 * * ? # Everyday at midnight. Previously 0 0 * * *
+      FORCE_IMAGE_REMOVAL: 1
+      FORCE_CONTAINER_REMOVAL: 0
+      GRACE_PERIOD_SECONDS: 604800
+      DRY_RUN: 0
+      CLEAN_UP_VOLUMES: 1
+      TZ: $TZ
+      DOCKER_HOST: tcp://socket-proxy:2375
       
   # Portainer - WebUI for Containers
   # https://github.com/portainer/portainer-compose/blob/master/traefik/docker-compose.yml
