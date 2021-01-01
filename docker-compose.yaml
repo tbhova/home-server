@@ -1,4 +1,6 @@
-version: '3.8'
+#version: '3.8'
+version: '2.4'
+# Only v2 of compose supports cpuset for pinning https://forums.docker.com/t/docker-compose-v3-linux-core-isolation-cpu-pinning/101148.
 
 services:
 
@@ -333,6 +335,57 @@ services:
       - "traefik.http.routers.plex-secure.service=plexms-svc"
       - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
 
+   # Handbrake - Video Conversion (Transcoding and compression)
+  handbrake:
+    image: jlesage/handbrake:latest
+    container_name: handbrake
+    restart: unless-stopped
+    # Pin handbrake to both threads on core 1
+    cpuset: 1,5
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    # ports:
+    #   - "$HANDBRAKE_PORT:5800"
+    volumes:
+      - $DOCKERDIR/handbrake/config:/config:rw
+      #- /mnt/user/downloads/handbrake-watch:/watch:rw
+      # See https://www.youtube.com/watch?v=yibUWakxR18&t=660 for directory naming.
+      - /mnt/user/downloads/complete-media:/watch:rw  # Match SABNnzbd output directory for movies and tv
+      - /mnt/user/downloads/processed:/output:rw  # Match the docker path mounted to Radarr and Sonarr to /downloads/complete
+      # Directories for ad-hoc compression
+      #- /mnt/user/downloads:/downloads:ro
+      #- /mnt/user/media:/media:ro
+      #- /mnt/user/media:/media:rw
+    environment:
+      USER_ID: $PUID
+      GROUP_ID: $PGID
+      TZ: $TZ
+      UMASK: 002
+      KEEP_APP_RUNNING: 1
+      CLEAN_TMP_DIR: 1
+      # For the UI displayed by Guacamole
+      DISPLAY_WIDTH: 1600
+      DISPLAY_HEIGHT: 800
+      AUTOMATED_CONVERSION_KEEP_SOURCE: 0
+      AUTOMATED_CONVERSION_PRESET: myh265  # Configured in UI. See https://www.youtube.com/watch?v=NA_sO3rH2mU&t=862
+      AUTOMATED_CONVERSION_FORMAT: mkv
+      AUTOMATED_CONVERSION_NON_VIDEO_FILE_ACTION: copy  # Copy non-video files without modification.
+      AUTOMATED_CONVERSION_OUTPUT_SUBDIR: SAME_AS_SRC
+      #VNC_PASSWORD: $HANDBRAKE_VNC_PASSWD
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.handbrake-rtr.entrypoints=websecure"
+      - "traefik.http.routers.handbrake-rtr.rule=Host(`handbrake.$DOMAINNAME`)"
+      - "traefik.http.routers.handbrake-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.handbrake-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.handbrake-rtr.service=handbrake-svc"
+      - "traefik.http.services.handbrake-svc.loadbalancer.server.port=5800"
+
   # Calibre-web UI – Ebooks and Management (Plex of Ebooks)
   # Set up: https://www.atlantic.net/vps-hosting/how-to-install-calibre-web-on-ubuntu-20-04-with-docker/
   calibre-web:
@@ -506,7 +559,9 @@ services:
       - "9089:8080"
     volumes:
       - $DOCKERDIR/sabnzbd:/config
-      - /mnt/user/downloads:/config/Downloads
+      - /mnt/user/downloads:/downloads
+      - /mnt/user/downloads/complete-media/movies:/downloads/complete/movies
+      - /mnt/user/downloads/complete-media/tv:/downloads/complete/tv
       - /mnt/user/downloads/watch:/watch # optional
     environment:
       TZ: $TZ
@@ -584,7 +639,8 @@ services:
       - "7878:7878"
     volumes:
       - $DOCKERDIR/radarr:/config
-      - /mnt/user/downloads/movies:/config/Downloads/movies  # Needs to match path reported by SABNnzbd.
+      #- /mnt/user/downloads/complete/movies:/downloads/complete/moives  # Needs to match path reported by SABNnzbd or Handbrake.
+      - /mnt/user/downloads/processed/movies:/downloads/complete/movies  # Needs to match path reported by SABNnzbd or Handbrake.
       - /mnt/user/media/Movies:/movies
       # - $DOCKERDIR/shared/mp4_automator:/config_mp4_automator
       - /etc/localtime:/etc/localtime:ro
@@ -660,7 +716,8 @@ services:
       - "8989:8989"
     volumes:
       - $DOCKERDIR/sonarr:/config
-      - /mnt/user/downloads/tv:/config/Downloads/tv  # Needs to match path reported by SABNnzbd.
+      #- /mnt/user/downloads/complete/tv:/downloads/complete/tv  # Needs to match path reported by SABNnzbd or Handbrake.
+      - /mnt/user/downloads/processed/tv:/downloads/complete/tv  # Needs to match path reported by SABNnzbd or Handbrake.
       - /mnt/user/media/TV:/tv
       - /etc/localtime:/etc/localtime:ro
     #   - "$DOCKERDIR/shared/mp4_automator:/config_mp4_automator:rw"
@@ -702,7 +759,7 @@ services:
     # - "5299:5299"
     volumes:
       - $DOCKERDIR/lazylibrarian:/config
-      - /mnt/user/downloads/complete:/config/Downloads/complete
+      - /mnt/user/downloads/complete:/downloads/complete
       - /mnt/user/media/Calibre:/books:rw
       - /mnt/user/media/Audiobooks:/audiobooks:rw
       - /etc/localtime:/etc/localtime:ro
