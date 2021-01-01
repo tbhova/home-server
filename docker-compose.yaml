@@ -405,14 +405,15 @@ services:
       - t2_proxy
     security_opt:
       - no-new-privileges:true
-    #ports:
-    #  - "8084:8080" # Desktop GUI
-    #  - "8081:8081" # Webserver GUI
+    ports:
+    #  - "9082:8080" # Desktop GUI
+      - "9081:8081" # Webserver GUI and Calibre content server
     volumes:
       - $DOCKERDIR/calibre:/config:rw
       - /mnt/user/media/Calibre:/config/Calibre Library:rw
-      - /mnt/user/downloads/completed:/downloads:rw
+      - /mnt/user/downloads/complete:/downloads:rw
       - /mnt/user/media/Books:/books:rw
+      - /mnt/user/media/Audiobooks:/audiobooks:rw
     environment:
       PUID: $PUID
       PGID: $PGID
@@ -583,7 +584,7 @@ services:
       - "7878:7878"
     volumes:
       - $DOCKERDIR/radarr:/config
-      - /mnt/user/downloads/movies:/config/Downloads/movies
+      - /mnt/user/downloads/movies:/config/Downloads/movies  # Needs to match path reported by SABNnzbd.
       - /mnt/user/media/Movies:/movies
       # - $DOCKERDIR/shared/mp4_automator:/config_mp4_automator
       - /etc/localtime:/etc/localtime:ro
@@ -659,7 +660,7 @@ services:
       - "8989:8989"
     volumes:
       - $DOCKERDIR/sonarr:/config
-      - /mnt/user/downloads/tv:/downloads
+      - /mnt/user/downloads/tv:/config/Downloads/tv  # Needs to match path reported by SABNnzbd.
       - /mnt/user/media/TV:/tv
       - /etc/localtime:/etc/localtime:ro
     #   - "$DOCKERDIR/shared/mp4_automator:/config_mp4_automator:rw"
@@ -701,14 +702,16 @@ services:
     # - "5299:5299"
     volumes:
       - $DOCKERDIR/lazylibrarian:/config
-      - /mnt/user/downloads/complete:/downloads
+      - /mnt/user/downloads/complete:/config/Downloads/complete
       - /mnt/user/media/Calibre:/books:rw
+      - /mnt/user/media/Audiobooks:/audiobooks:rw
       - /etc/localtime:/etc/localtime:ro
     environment:
       PUID: $PUID
       PGID: $PGID
       TZ: $TZ
-      DOCKER_MODS: linuxserver/calibre-web:calibre # set the path to converter tool to /app/calibre/ebook-convert
+      # Set the path to ebook converter tool to /app/calibre/ebook-convert and ffmpeg to ffmpeg (/usr/bin/ffmpeg)
+      DOCKER_MODS: linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
     labels:
       - "traefik.enable=true"
       ## HTTP Routers Auth
