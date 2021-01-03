@@ -507,7 +507,38 @@ services:
       - "traefik.http.routers.plex-secure.service=plexms-svc"
       - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"
 
-   # Handbrake - Video Conversion (Transcoding and compression)
+  # Tautulli - Previously PlexPy. Plex statistics and monitoring
+  # Set HTTP Root in Tautulli settings if using PathPrefix
+  tautulli:
+    image: linuxserver/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8181:8181"
+    volumes:
+      - $DOCKERDIR/tautulli/config:/config
+      - $DOCKERDIR/tautulli/logs:/logs:ro
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.tautulli-rtr.entrypoints=websecure"
+      - "traefik.http.routers.tautulli-rtr.rule=Host(`tautulli.$DOMAINNAME`)"
+      - "traefik.http.routers.tautulli-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.tautulli-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.tautulli-rtr.service=tautulli-svc"
+      - "traefik.http.services.tautulli-svc.loadbalancer.server.port=8181"
+
+  # Handbrake - Video Conversion (Transcoding and compression)
   handbrake:
     image: jlesage/handbrake:latest
     container_name: handbrake
