@@ -426,11 +426,13 @@ services:
       - $DOCKERDIR/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro # The committed config is a symbolic link to this file.
       - /run/udev:/run/udev:ro # Required by diskio https://github.com/influxdata/telegraf/blob/release-1.17/plugins/inputs/diskio/README.md
       # https://hub.docker.com/_/telegraf "Monitoring the docker engine host"
-      - /etc:/hostfs/etc:ro
-      - /proc:/hostfs/proc:ro
-      - /sys:/hostfs/sys:ro
-      - /var:/hostfs/var:ro
-      - /run:/hostfs/run:ro
+      # Has to be / otherwise the array status doesn't work because they lack access to the disnk's mount points.
+      - /:/hostfs:ro
+      #- /etc:/hostfs/etc:ro
+      #- /proc:/hostfs/proc:ro
+      #- /sys:/hostfs/sys:ro
+      #- /var:/hostfs/var:ro
+      #- /run:/hostfs/run:ro
     # From: https://forums.unraid.net/topic/96895-ultimate-unraid-dashboard-uud/
     # The official telegraf image uses apt (Debian) instead apk (alpine) for the package manager.
     # However, switching the image to an alpine tag (instead of latest) would require switching to apk
