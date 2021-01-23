@@ -214,7 +214,8 @@ services:
       WATCHTOWER_INCLUDE_STOPPED: "true" # Upgrade stopped containers too.
       DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
       WATCHTOWER_POLL_INTERVAL: 86400 # Check for updates interval in seconds.
-      #WATCHTOWER_TRACE: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "false"
+      WATCHTOWER_TRACE: "true"
 
   # Docker-GC - Automatic Docker Garbage Collection
   # Create docker-gc-exclude file
