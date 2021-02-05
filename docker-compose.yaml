@@ -603,6 +603,76 @@ services:
       VRKN_RADARR_1_QUEUE_RUN_SECONDS: 300
       VRKN_RADARR_1_GET_MISSING: 'true'
       VRKN_RADARR_1_GET_MISSING_RUN_SECONDS: 300
+      
+      
+  ################################ Home Automation ###########################
+
+  # https://hub.docker.com/r/sirfragalot/hyperion.ng
+  hyperion-left:
+    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
+    container_name: hyperion-left
+    ports:
+      - target: 19445
+        published: 19447
+        protocol: tcp
+        mode: host
+      - target: 19444
+        published: 19446
+        protocol: tcp
+        mode: host
+      - target: 8090
+        published: 8091
+        protocol: tcp
+    volumes:
+      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+      
+  hyperion-middle:
+    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
+    container_name: hyperion-middle
+    ports:
+      - target: 19445
+        published: 19445
+        protocol: tcp
+        mode: host
+      - target: 19444
+        published: 19444
+        protocol: tcp
+        mode: host
+      - target: 8090
+        published: 8090
+        protocol: tcp
+    volumes:
+      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+
+  hyperion-right:
+    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
+    container_name: hyperion-right
+    ports:
+      - target: 19445
+        published: 19449
+        protocol: tcp
+        mode: host
+      - target: 19444
+        published: 19448
+        protocol: tcp
+        mode: host
+      - target: 8090
+        published: 8092
+        protocol: tcp
+    volumes:
+      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
   
   ################################ Media  
 
