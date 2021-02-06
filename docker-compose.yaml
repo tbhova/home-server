@@ -611,6 +611,7 @@ services:
   hyperion-left:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-left
+    restart: unless-stopped
     ports:
       - target: 19445
         published: 19447
@@ -624,7 +625,7 @@ services:
         published: 8091
         protocol: tcp
     volumes:
-      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+      - $DOCKERDIR/hyperion_left:/root/.hyperion:rw
     environment:
       PUID: $PUID
       PGID: $PGID
@@ -633,6 +634,7 @@ services:
   hyperion-middle:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-middle
+    restart: unless-stopped
     ports:
       - target: 19445
         published: 19445
@@ -655,6 +657,7 @@ services:
   hyperion-right:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-right
+    restart: unless-stopped
     ports:
       - target: 19445
         published: 19449
@@ -668,7 +671,7 @@ services:
         published: 8092
         protocol: tcp
     volumes:
-      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+      - $DOCKERDIR/hyperion_right:/root/.hyperion:rw
     environment:
       PUID: $PUID
       PGID: $PGID
