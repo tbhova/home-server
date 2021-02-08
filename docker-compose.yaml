@@ -294,6 +294,53 @@ services:
       - "traefik.http.routers.edge-secure.service=edge"
       - "traefik.http.services.edge.loadbalancer.server.port=8000"
       
+  # Visual Studio Code
+  # Alternative: https://hub.docker.com/r/linuxserver/code-server
+  # https://hub.docker.com/r/codercom/code-server
+  code-server:
+    # image: ghcr.io/linuxserver/code-server
+    # image: codercom/code-server:latest
+    build: ./vscode
+    container_name: code-server
+    restart: unless-stopped
+    networks:
+      - t2_proxy
+    #security_opt:
+      #- no-new-privileges:true
+    environment:
+      TZ: $TZ
+      #PUID: 0
+      #PGID: 0
+      PUID: $PUID
+      PGID: $PGID
+      #DOCKER_USER: root
+      #PASSWORD: password #optional
+      #HASHED_PASSWORD= #optional
+      #SUDO_PASSWORD=password #optional
+      #SUDO_PASSWORD_HASH= #optional
+      #PROXY_DOMAIN=code-server.my.domain #optional
+    volumes:
+      # - $DOCKERDIR/vscode:/config
+      - $DOCKERDIR/vscode:/home/coder/.config
+      - /mnt/user/appdata/home_server_git:/home_server_git
+      - /mnt/user/appdata/Marlin:/Marlin
+    ports:
+      #- 8443:8443
+      #- 8080:8080
+      - 8010:8010
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.vscode-rtr.entrypoints=websecure"
+      - "traefik.http.routers.vscode-rtr.rule=Host(`code.$DOMAINNAME`)"
+      - "traefik.http.routers.vscode-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.vscode-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.vscode-rtr.service=vscode-svc"
+      #- "traefik.http.services.vscode-svc.loadbalancer.server.port=8443"
+      - "traefik.http.services.vscode-svc.loadbalancer.server.port=8080"
+      
   # Dozzle - Real-time Docker Log Viewer
   # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2-web.yml
   dozzle:
@@ -612,6 +659,8 @@ services:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-left
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     ports:
       - target: 19445
         published: 19447
@@ -635,6 +684,8 @@ services:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-middle
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     ports:
       - target: 19445
         published: 19445
@@ -658,6 +709,8 @@ services:
     image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-right
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     ports:
       - target: 19445
         published: 19449
@@ -707,7 +760,7 @@ services:
     hostname: "PlexServer"
     volumes:
       - $DOCKERDIR/plex_config:/config
-      - /mnt/user/appdata/tmp/plex_tmp:/transcode
+      - /mnt/user/tmp/plex_tmp:/transcode
       - /mnt/user/media:/data
     labels:
       - "traefik.enable=true" 
