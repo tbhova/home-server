@@ -321,12 +321,12 @@ services:
       #PROXY_DOMAIN=code-server.my.domain #optional
     volumes:
       # - $DOCKERDIR/vscode:/config
-      - $DOCKERDIR/vscode:/home/coder/.config
+      - $DOCKERDIR/vscode:/home/coder
       - /mnt/user/appdata/home_server_git:/home_server_git
       - /mnt/user/appdata/Marlin:/Marlin
     ports:
       #- 8443:8443
-      #- 8080:8080
+      #- 8011:8080
       - 8010:8010
     labels:
       - "traefik.enable=true"
