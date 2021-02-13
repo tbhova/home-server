@@ -210,10 +210,11 @@ services:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
-      WATCHTOWER_CLEANUP: "true" # Delete old images
+      # https://forum.storj.io/t/watchtower-still-does-not-work-for-me-whats-wrong/7328/78 recommend no --cleanup
+      WATCHTOWER_CLEANUP: "false" # Let docker-gc delete old images
       WATCHTOWER_INCLUDE_STOPPED: "true" # Upgrade stopped containers too.
       DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
-      WATCHTOWER_POLL_INTERVAL: 86400 # Check for updates interval in seconds.
+      WATCHTOWER_POLL_INTERVAL: 43200 # Check for updates interval in seconds.
       WATCHTOWER_NO_STARTUP_MESSAGE: "false"
       WATCHTOWER_TRACE: "true"
 
