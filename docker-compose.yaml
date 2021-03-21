@@ -233,7 +233,7 @@ services:
       # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead for improved security
       - $DOCKERDIR/docker-gc/docker-gc-exclude:/etc/docker-gc-exclude
     environment:
-      CRON: 0 0 0 * * ? # Everyday at midnight. Previously 0 0 * * *
+      CRON: 0 0 0/12 ? * * * # Everyday  12 hours. Previously 0 0 0 * * ?
       FORCE_IMAGE_REMOVAL: 1
       FORCE_CONTAINER_REMOVAL: 0
       GRACE_PERIOD_SECONDS: 604800
@@ -306,8 +306,8 @@ services:
     restart: unless-stopped
     networks:
       - t2_proxy
-    #security_opt:
-      #- no-new-privileges:true
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: $TZ
       #PUID: 0
@@ -321,8 +321,8 @@ services:
       #SUDO_PASSWORD_HASH= #optional
       #PROXY_DOMAIN=code-server.my.domain #optional
     volumes:
-      # - $DOCKERDIR/vscode:/config
-      - $DOCKERDIR/vscode:/home/coder
+      - $DOCKERDIR/vscode/root:/root
+      - $DOCKERDIR/vscode/home:/home/coder
       - /mnt/user/appdata/home_server_git:/home_server_git
       - /mnt/user/appdata/Marlin:/Marlin
     ports:
@@ -356,6 +356,9 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
       DOZZLE_LEVEL: info
       DOZZLE_TAILSIZE: 300
       DOZZLE_FILTER: "status=running"
@@ -374,6 +377,31 @@ services:
       ## HTTP Services
       - "traefik.http.routers.dozzle-rtr.service=dozzle-svc"
       - "traefik.http.services.dozzle-svc.loadbalancer.server.port=8080"
+
+  # https://hub.docker.com/r/linuxserver/duplicati
+  duplicati:
+    image: ghcr.io/linuxserver/duplicati
+    container_name: duplicati
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      #CLI_ARGS: #optional
+    volumes:
+      - $DOCKERDIR/duplicati:/config
+      - /mnt/user/backups:/backups
+      - type: bind
+        source: /mnt/disks/secure/duplicati
+        target: /google-drive
+        bind:
+          propagation: rslave
+      #- /mnt/user/appdata:/source/appdata:ro
+      #- /mnt/user/system:/source/system:ro
+    ports:
+      - 8200:8200
 
   # We could alternatively use https://hub.docker.com/r/testdasi/grafana-unraid-stack instead of the individual containers.
   # But update cadence doesn't look that great (already 2 dashboard version behind).
