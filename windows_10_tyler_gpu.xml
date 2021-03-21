@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<domain type='kvm' id='13'>
+<domain type='kvm' id='8'>
   <name>Windows 10 Tyler GPU</name>
   <uuid>4c7c30aa-96ef-3dea-b8de-465d3d7f9da7</uuid>
   <metadata>
     <vmtemplate xmlns="unraid" name="Windows 10" icon="windows.png" os="windows10"/>
   </metadata>
-  <memory unit='KiB'>12582912</memory>
-  <currentMemory unit='KiB'>12582912</currentMemory>
+  <memory unit='KiB'>13107200</memory>
+  <currentMemory unit='KiB'>13107200</currentMemory>
   <memoryBacking>
     <nosharepages/>
   </memoryBacking>
@@ -25,7 +25,7 @@
   <os>
     <type arch='x86_64' machine='pc-q35-4.2'>hvm</type>
     <loader readonly='yes' type='pflash'>/usr/share/qemu/ovmf-x64/OVMF_CODE-pure-efi.fd</loader>
-    <nvram>/etc/libvirt/qemu/nvram/4c7c30aa-96ef-3dea-b8de-465d3d7f9da7_VARS-pure-efi.fd</nvram>
+    <nvram>/etc/libvirt/qemu/nvram/b69b1cbc-9a3d-a658-8606-38bd37ac4044_VARS-pure-efi.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -61,7 +61,7 @@
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file='/mnt/user/isos/Win10_2004_English_x64.iso' index='2'/>
+      <source file='/mnt/user/isos/VirtIO_all_drivers_Win10_20H2_v2_English_x64.iso' index='2'/>
       <backingStore/>
       <target dev='hda' bus='sata'/>
       <readonly/>
@@ -78,9 +78,24 @@
       <alias name='sata0-0-1'/>
       <address type='drive' controller='0' bus='0' target='0' unit='1'/>
     </disk>
-    <controller type='sata' index='0'>
-      <alias name='ide'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
+    <controller type='usb' index='0' model='ich9-ehci1'>
+      <alias name='usb'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x7'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci1'>
+      <alias name='usb'/>
+      <master startport='0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0' multifunction='on'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci2'>
+      <alias name='usb'/>
+      <master startport='2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x1' multifunction='on'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci3'>
+      <alias name='usb'/>
+      <master startport='4'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x2'/>
     </controller>
     <controller type='pci' index='0' model='pcie-root'>
       <alias name='pcie.0'/>
@@ -121,51 +136,42 @@
       <alias name='pci.6'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x5'/>
     </controller>
+    <controller type='pci' index='7' model='pcie-root-port'>
+      <model name='pcie-root-port'/>
+      <target chassis='7' port='0xe'/>
+      <alias name='pci.7'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x6'/>
+    </controller>
     <controller type='virtio-serial' index='0'>
       <alias name='virtio-serial0'/>
       <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
     </controller>
-    <controller type='usb' index='0' model='ich9-ehci1'>
-      <alias name='usb'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x7'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci1'>
-      <alias name='usb'/>
-      <master startport='0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0' multifunction='on'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci2'>
-      <alias name='usb'/>
-      <master startport='2'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x1'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci3'>
-      <alias name='usb'/>
-      <master startport='4'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x2'/>
+    <controller type='sata' index='0'>
+      <alias name='ide'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
     </controller>
     <interface type='bridge'>
-      <mac address='52:54:00:65:4b:64'/>
+      <mac address='52:54:00:6d:8f:37'/>
       <source bridge='br0'/>
-      <target dev='vnet0'/>
+      <target dev='vnet1'/>
       <model type='virtio'/>
       <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
     </interface>
     <serial type='pty'>
-      <source path='/dev/pts/0'/>
+      <source path='/dev/pts/3'/>
       <target type='isa-serial' port='0'>
         <model name='isa-serial'/>
       </target>
       <alias name='serial0'/>
     </serial>
-    <console type='pty' tty='/dev/pts/0'>
-      <source path='/dev/pts/0'/>
+    <console type='pty' tty='/dev/pts/3'>
+      <source path='/dev/pts/3'/>
       <target type='serial' port='0'/>
       <alias name='serial0'/>
     </console>
     <channel type='unix'>
-      <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-13-Windows 10 Tyler GPU/org.qemu.guest_agent.0'/>
+      <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-8-Windows 10 Tyler GPU/org.qemu.guest_agent.0'/>
       <target type='virtio' name='org.qemu.guest_agent.0' state='disconnected'/>
       <alias name='channel0'/>
       <address type='virtio-serial' controller='0' bus='0' port='1'/>
