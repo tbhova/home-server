@@ -341,6 +341,37 @@ services:
       - "traefik.http.routers.vscode-rtr.service=vscode-svc"
       #- "traefik.http.services.vscode-svc.loadbalancer.server.port=8443"
       - "traefik.http.services.vscode-svc.loadbalancer.server.port=8080"
+
+  # Firefox
+  # https://hub.docker.com/r/jlesage/firefox
+  firefox:
+    image: jlesage/firefox
+    container_name: firefox
+    restart: always
+    networks:
+     - t2_proxy
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    # ports:
+    #   - 5800:5800
+    volumes:
+     - /docker/appdata/firefox:/config:rw
+    shm_size: 2G
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.firefox-rtr.entrypoints=websecure"
+      - "traefik.http.routers.firefox-rtr.rule=Host(`firefox.$DOMAINNAME`)"
+      - "traefik.http.routers.firefox-rtr.tls=true"
+      ## Middlewares
+      - "traefik.http.routers.firefox-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.firefox-rtr.service=firefox-svc"
+      - "traefik.http.services.firefox-svc.loadbalancer.server.port=5800"
       
   # Dozzle - Real-time Docker Log Viewer
   # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2-web.yml
