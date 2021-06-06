@@ -343,6 +343,32 @@ services:
       #- "traefik.http.services.vscode-svc.loadbalancer.server.port=8443"
       - "traefik.http.services.vscode-svc.loadbalancer.server.port=8080"
 
+  # Postgres
+  db-test:
+    image: postgres
+    container_name: postgres-test
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+  pgadmin-test:
+    container_name: pgadmin4_container-test
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+
+  adminer-test:
+    image: adminer
+    container_name: adminer-test
+    restart: always
+    ports:
+      - 9880:8080
+
   # Firefox
   # https://hub.docker.com/r/jlesage/firefox
   firefox:
