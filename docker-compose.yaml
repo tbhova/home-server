@@ -214,7 +214,7 @@ services:
       WATCHTOWER_CLEANUP: "false" # Let docker-gc delete old images
       WATCHTOWER_INCLUDE_STOPPED: "true" # Upgrade stopped containers too.
       DOCKER_HOST: tcp://socket-proxy:2375 # POST to be enabled on Socket Proxy
-      WATCHTOWER_POLL_INTERVAL: 43200 # Check for updates interval in seconds.
+      WATCHTOWER_POLL_INTERVAL: 21700 # Check for updates interval in seconds.
       WATCHTOWER_NO_STARTUP_MESSAGE: "false"
       WATCHTOWER_TRACE: "true"
 
@@ -325,6 +325,7 @@ services:
       - $DOCKERDIR/vscode/home:/home/coder
       - /mnt/user/appdata/home_server_git:/home_server_git
       - /mnt/user/appdata/Marlin:/Marlin
+      - /mnt/user/appdata/ColleenSQL:/ColleenSQL
     ports:
       #- 8443:8443
       #- 8011:8080
@@ -359,7 +360,7 @@ services:
     # ports:
     #   - 5800:5800
     volumes:
-     - /docker/appdata/firefox:/config:rw
+     - $DOCKERDIR/firefox:/config:rw
     shm_size: 2G
     labels:
       - "traefik.enable=true"
@@ -433,6 +434,28 @@ services:
       #- /mnt/user/system:/source/system:ro
     ports:
       - 8200:8200
+
+  # Syncthing - file synchronization
+  # https://hub.docker.com/r/linuxserver/syncthing
+  syncthing:
+    image: ghcr.io/linuxserver/syncthing
+    container_name: syncthing
+    hostname: syncthing #optional
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    volumes:
+      - $DOCKERDIR/syncthing:/config
+      #- /path/to/data1:/data1
+      #- /path/to/data2:/data2
+    ports:
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
 
   # We could alternatively use https://hub.docker.com/r/testdasi/grafana-unraid-stack instead of the individual containers.
   # But update cadence doesn't look that great (already 2 dashboard version behind).
