@@ -764,33 +764,33 @@ services:
   ################################ Home Automation ###########################
 
   # https://hub.docker.com/r/sirfragalot/hyperion.ng
-  hyperion-left:
-    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
-    container_name: hyperion-left
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    ports:
-      - target: 19445
-        published: 19447
-        protocol: tcp
-        mode: host
-      - target: 19444
-        published: 19446
-        protocol: tcp
-        mode: host
-      - target: 8090
-        published: 8091
-        protocol: tcp
-    volumes:
-      - $DOCKERDIR/hyperion_left:/root/.hyperion:rw
-    environment:
-      PUID: $PUID
-      PGID: $PGID
-      TZ: $TZ
+  # hyperion-left:
+  #   image: sirfragalot/hyperion.ng:2.0.0-alpha.10-x86_64  # Tag needs manual updating with every release.
+  #   container_name: hyperion-left
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   ports:
+  #     - target: 19445
+  #       published: 19447
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 19444
+  #       published: 19446
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 8090
+  #       published: 8091
+  #       protocol: tcp
+  #   volumes:
+  #     - $DOCKERDIR/hyperion_left:/root/.hyperion:rw
+  #   environment:
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #     TZ: $TZ
       
   hyperion-middle:
-    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
+    image: sirfragalot/hyperion.ng:2.0.0-alpha.10-x86_64  # Tag needs manual updating with every release.
     container_name: hyperion-middle
     restart: unless-stopped
     security_opt:
@@ -814,30 +814,30 @@ services:
       PGID: $PGID
       TZ: $TZ
 
-  hyperion-right:
-    image: sirfragalot/hyperion.ng:2.0.0-alpha.9-x86_64  # Tag needs manual updating with every release.
-    container_name: hyperion-right
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    ports:
-      - target: 19445
-        published: 19449
-        protocol: tcp
-        mode: host
-      - target: 19444
-        published: 19448
-        protocol: tcp
-        mode: host
-      - target: 8090
-        published: 8092
-        protocol: tcp
-    volumes:
-      - $DOCKERDIR/hyperion_right:/root/.hyperion:rw
-    environment:
-      PUID: $PUID
-      PGID: $PGID
-      TZ: $TZ
+  # hyperion-right:
+  #   image: sirfragalot/hyperion.ng:2.0.0-alpha.10-x86_64  # Tag needs manual updating with every release.
+  #   container_name: hyperion-right
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   ports:
+  #     - target: 19445
+  #       published: 19449
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 19444
+  #       published: 19448
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 8090
+  #       published: 8092
+  #       protocol: tcp
+  #   volumes:
+  #     - $DOCKERDIR/hyperion_right:/root/.hyperion:rw
+  #   environment:
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #     TZ: $TZ
   
   ################################ Media  
 
