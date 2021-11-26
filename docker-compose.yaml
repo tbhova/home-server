@@ -765,7 +765,7 @@ services:
 
   # https://hub.docker.com/r/sirfragalot/hyperion.ng
   # hyperion-left:
-  #   image: sirfragalot/hyperion.ng:2.0.0-alpha.11-x86_64  # Tag needs manual updating with every release.
+  #   image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
   #   container_name: hyperion-left
   #   restart: unless-stopped
   #   security_opt:
@@ -790,7 +790,7 @@ services:
   #     TZ: $TZ
       
   hyperion-middle:
-    image: sirfragalot/hyperion.ng:2.0.0-alpha.11-x86_64  # Tag needs manual updating with every release.
+    image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
     container_name: hyperion-middle
     restart: unless-stopped
     security_opt:
@@ -815,7 +815,7 @@ services:
       TZ: $TZ
 
   # hyperion-right:
-  #   image: sirfragalot/hyperion.ng:2.0.0-alpha.11-x86_64  # Tag needs manual updating with every release.
+  #   image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
   #   container_name: hyperion-right
   #   restart: unless-stopped
   #   security_opt:
