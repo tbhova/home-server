@@ -326,6 +326,7 @@ services:
       - /mnt/user/appdata/home_server_git:/home_server_git
       - /mnt/user/appdata/Marlin:/Marlin
       - /mnt/user/appdata/ColleenSQL:/ColleenSQL
+      - /mnt/user/documents/Tyler/3dPrinting/3D-Printer-Parts:/3d-printer-parts
     ports:
       #- 8443:8443
       #- 8011:8080
