@@ -327,6 +327,8 @@ services:
       - /mnt/user/appdata/Marlin:/Marlin
       - /mnt/user/appdata/ColleenSQL:/ColleenSQL
       - /mnt/user/documents/Tyler/3dPrinting/3D-Printer-Parts:/3d-printer-parts
+      - /mnt/user/appdata/real_estate_analysis/Realestate:/real-estate-analysis
+      - /mnt/user/appdata/rental-market-notebooks/Realestate:/real-estate-notebooks
     ports:
       #- 8443:8443
       #- 8011:8080
