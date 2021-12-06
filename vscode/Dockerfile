@@ -15,6 +15,7 @@ RUN sudo apt-get update && apt-get install -y \
 # https://github.com/cdr/code-server/issues/171
 RUN code-server --install-extension platformio.platformio-ide --force && \
     code-server --install-extension ms-vscode.cpptools --force && \
-    code-server --install-extension ms-toolsai.jupyter --force
+    code-server --install-extension ms-toolsai.jupyter --force && \
+    code-server --install-extension ms-python.python --force
 	
 EXPOSE 8010
