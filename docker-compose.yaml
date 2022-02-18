@@ -873,7 +873,9 @@ services:
     volumes:
       - $DOCKERDIR/plex_config:/config
       - /mnt/user/tmp/plex_tmp:/transcode
-      - /mnt/user/media:/data
+      - /mnt/user/media/TV:/data/TV
+      - /mnt/user/media/Movies:/data/Movies
+      - /mnt/user/media/Videos/HomeVideoVHS:/data/Videos/HomeVideoVHS
     labels:
       - "traefik.enable=true" 
       ## Routers
