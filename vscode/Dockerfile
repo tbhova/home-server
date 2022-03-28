@@ -11,6 +11,8 @@ USER root
 RUN sudo apt-get update && apt-get install -y \
         python3-distutils
 
+USER coder
+
 # https://github.com/ThorbenJensen/code-server-blueprint/blob/master/Dockerfile
 # https://github.com/cdr/code-server/issues/171
 RUN code-server --install-extension platformio.platformio-ide --force && \
