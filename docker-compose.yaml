@@ -515,7 +515,7 @@ services:
       - "9086:8086" # API
     volumes:
       - $DOCKERDIR/influxdbv1/db:/var/lib/influxdb
-      # Generate with docker run --rm influxdb influxd config > ../docker/influxdbv1/influxdb.conf
+      # Generate with docker run --rm influxdbv1 influxd config > ../docker/influxdbv1/influxdb.conf
       - $DOCKERDIR/influxdbv1/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     environment:
       PUID: $PUID
