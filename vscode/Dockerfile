@@ -8,8 +8,10 @@ FROM codercom/code-server:latest
 # Switch to root for apt install, then switch back.
 USER root
 
-RUN sudo apt-get update && apt-get install -y \
-        python3-distutils
+# https://github.com/coder/code-server/issues/1448#issuecomment-856604411
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 python3-distutils python3-dev python3-pip curl make && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 USER coder
 
@@ -19,5 +21,5 @@ RUN code-server --install-extension platformio.platformio-ide --force && \
     code-server --install-extension ms-vscode.cpptools --force && \
     code-server --install-extension ms-toolsai.jupyter --force && \
     code-server --install-extension ms-python.python --force
-	
+
 EXPOSE 8010
