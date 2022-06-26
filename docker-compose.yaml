@@ -300,8 +300,8 @@ services:
   # https://hub.docker.com/r/codercom/code-server
   code-server:
     # image: ghcr.io/linuxserver/code-server
-    # image: codercom/code-server:latest
-    build: ./vscode
+    image: codercom/code-server:latest
+    # build: ./vscode
     container_name: code-server
     restart: unless-stopped
     networks:
@@ -310,8 +310,6 @@ services:
       - no-new-privileges:true
     environment:
       TZ: $TZ
-      #PUID: 0
-      #PGID: 0
       PUID: $PUID
       PGID: $PGID
       #DOCKER_USER: root
@@ -345,37 +343,6 @@ services:
       - "traefik.http.routers.vscode-rtr.service=vscode-svc"
       #- "traefik.http.services.vscode-svc.loadbalancer.server.port=8443"
       - "traefik.http.services.vscode-svc.loadbalancer.server.port=8080"
-
-  # Firefox
-  # https://hub.docker.com/r/jlesage/firefox
-  firefox:
-    image: jlesage/firefox
-    container_name: firefox
-    restart: always
-    networks:
-     - t2_proxy
-    security_opt:
-      - no-new-privileges:true
-    environment:
-      TZ: $TZ
-      PUID: $PUID
-      PGID: $PGID
-    # ports:
-    #   - 5800:5800
-    volumes:
-     - $DOCKERDIR/firefox:/config:rw
-    shm_size: 2G
-    labels:
-      - "traefik.enable=true"
-      ## HTTP Routers
-      - "traefik.http.routers.firefox-rtr.entrypoints=websecure"
-      - "traefik.http.routers.firefox-rtr.rule=Host(`firefox.$DOMAINNAME`)"
-      - "traefik.http.routers.firefox-rtr.tls=true"
-      ## Middlewares
-      - "traefik.http.routers.firefox-rtr.middlewares=chain-oauth@file"
-      ## HTTP Services
-      - "traefik.http.routers.firefox-rtr.service=firefox-svc"
-      - "traefik.http.services.firefox-svc.loadbalancer.server.port=5800"
       
   # Dozzle - Real-time Docker Log Viewer
   # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2-web.yml
@@ -766,30 +733,30 @@ services:
   #     PGID: $PGID
   #     TZ: $TZ
       
-  hyperion-middle:
-    image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
-    container_name: hyperion-middle
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    ports:
-      - target: 19445
-        published: 19445
-        protocol: tcp
-        mode: host
-      - target: 19444
-        published: 19444
-        protocol: tcp
-        mode: host
-      - target: 8090
-        published: 8090
-        protocol: tcp
-    volumes:
-      - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
-    environment:
-      PUID: $PUID
-      PGID: $PGID
-      TZ: $TZ
+  # hyperion-middle:
+  #   image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
+  #   container_name: hyperion-middle
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   ports:
+  #     - target: 19445
+  #       published: 19445
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 19444
+  #       published: 19444
+  #       protocol: tcp
+  #       mode: host
+  #     - target: 8090
+  #       published: 8090
+  #       protocol: tcp
+  #   volumes:
+  #     - $DOCKERDIR/hyperion_middle:/root/.hyperion:rw
+  #   environment:
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #     TZ: $TZ
 
   # hyperion-right:
   #   image: sirfragalot/hyperion.ng:2.0.12  # Tag needs manual updating with every release.
