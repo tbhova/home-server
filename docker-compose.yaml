@@ -846,7 +846,7 @@ services:
       - $DOCKERDIR/handbrake/config:/config:rw
       #- /mnt/user/downloads/handbrake-watch:/watch:rw
       # See https://www.youtube.com/watch?v=yibUWakxR18&t=660 for directory naming.
-      - /mnt/user/downloads/complete-media:/watch:rw  # Match SABNnzbd output directory for movies and tv
+      - /mnt/user/downloads/complete-media:/watch:rw  # Match SABnzbd output directory for movies and tv
       - /mnt/user/downloads/processed:/output:rw  # Match the docker path mounted to Radarr and Sonarr to /downloads/complete
       # Directories for ad-hoc compression
       #- /mnt/user/downloads:/downloads:ro
@@ -1036,7 +1036,7 @@ services:
       #TRANSMISSION_RATIO_LIMIT_ENABLED=false
       
   # SABnzbd - Binary newsgrabber (NZB downloader)
-  # Disable SABNnzbd's built-in HTTPS support for traefik proxy to work
+  # Disable SABnzbd's built-in HTTPS support for traefik proxy to work
   # https://github.com/htpcBeginner/docker-traefik/blob/master/docker-compose-t2.yml
   # To access from sabnzbd.$DOMAINNAME, sabnzbd.ini (created after first launch) needs to be edited.
   # Replace host_whitelist with a comma separated list of allowed host names, for example "sabnzbd.$DOMAINNAME, sabnzbd".
@@ -1164,8 +1164,8 @@ services:
       - "7878:7878"
     volumes:
       - $DOCKERDIR/radarr:/config
-      #- /mnt/user/downloads/complete/movies:/downloads/complete/moives  # Needs to match path reported by SABNnzbd or Handbrake.
-      - /mnt/user/downloads/processed/movies:/downloads/complete/movies  # Needs to match path reported by SABNnzbd or Handbrake.
+      #- /mnt/user/downloads/complete/movies:/downloads/complete/moives  # Needs to match path reported by SABnzbd or Handbrake.
+      - /mnt/user/downloads/processed/movies:/downloads/complete/movies  # Needs to match path reported by SABnzbd or Handbrake.
       - /mnt/user/media/Movies:/movies
       # - $DOCKERDIR/shared/mp4_automator:/config_mp4_automator
       - /etc/localtime:/etc/localtime:ro
@@ -1241,8 +1241,8 @@ services:
       - "8989:8989"
     volumes:
       - $DOCKERDIR/sonarr:/config
-      #- /mnt/user/downloads/complete/tv:/downloads/complete/tv  # Needs to match path reported by SABNnzbd or Handbrake.
-      - /mnt/user/downloads/processed/tv:/downloads/complete/tv  # Needs to match path reported by SABNnzbd or Handbrake.
+      #- /mnt/user/downloads/complete/tv:/downloads/complete/tv  # Needs to match path reported by SABnzbd or Handbrake.
+      - /mnt/user/downloads/processed/tv:/downloads/complete/tv  # Needs to match path reported by SABnzbd or Handbrake.
       - /mnt/user/media/TV:/tv
       - /etc/localtime:/etc/localtime:ro
     #   - "$DOCKERDIR/shared/mp4_automator:/config_mp4_automator:rw"
