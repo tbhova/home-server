@@ -835,7 +835,7 @@ services:
     container_name: handbrake
     restart: unless-stopped
     # Pin handbrake to both threads on core 1
-    cpuset: 1,5
+    cpuset: 5,11
     networks:
       - t2_proxy
     security_opt:
