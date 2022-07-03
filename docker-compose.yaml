@@ -381,51 +381,51 @@ services:
       - "traefik.http.services.dozzle-svc.loadbalancer.server.port=8080"
 
   # https://hub.docker.com/r/linuxserver/duplicati
-  duplicati:
-    image: ghcr.io/linuxserver/duplicati
-    container_name: duplicati
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    environment:
-      TZ: $TZ
-      PUID: $PUID
-      PGID: $PGID
-      #CLI_ARGS: #optional
-    volumes:
-      - $DOCKERDIR/duplicati:/config
-      - /mnt/user/backups:/backups
-      - type: bind
-        source: /mnt/disks/secure/duplicati
-        target: /google-drive
-        bind:
-          propagation: rslave
-      #- /mnt/user/appdata:/source/appdata:ro
-      #- /mnt/user/system:/source/system:ro
-    ports:
-      - 8200:8200
+  # duplicati:
+  #   image: ghcr.io/linuxserver/duplicati
+  #   container_name: duplicati
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   environment:
+  #     TZ: $TZ
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #     #CLI_ARGS: #optional
+  #   volumes:
+  #     - $DOCKERDIR/duplicati:/config
+  #     - /mnt/user/backups:/backups
+  #     - type: bind
+  #       source: /mnt/disks/secure/duplicati
+  #       target: /google-drive
+  #       bind:
+  #         propagation: rslave
+  #     #- /mnt/user/appdata:/source/appdata:ro
+  #     #- /mnt/user/system:/source/system:ro
+  #   ports:
+  #     - 8200:8200
 
   # Syncthing - file synchronization
   # https://hub.docker.com/r/linuxserver/syncthing
-  syncthing:
-    image: ghcr.io/linuxserver/syncthing
-    container_name: syncthing
-    hostname: syncthing #optional
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    environment:
-      TZ: $TZ
-      PUID: $PUID
-      PGID: $PGID
-    volumes:
-      - $DOCKERDIR/syncthing:/config
-      #- /path/to/data1:/data1
-      #- /path/to/data2:/data2
-    ports:
-      - 8384:8384
-      - 22000:22000
-      - 21027:21027/udp
+  # syncthing:
+  #   image: ghcr.io/linuxserver/syncthing
+  #   container_name: syncthing
+  #   hostname: syncthing #optional
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   environment:
+  #     TZ: $TZ
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #   volumes:
+  #     - $DOCKERDIR/syncthing:/config
+  #     #- /path/to/data1:/data1
+  #     #- /path/to/data2:/data2
+  #   ports:
+  #     - 8384:8384
+  #     - 22000:22000
+  #     - 21027:21027/udp
 
   # We could alternatively use https://hub.docker.com/r/testdasi/grafana-unraid-stack instead of the individual containers.
   # But update cadence doesn't look that great (already 2 dashboard version behind).
