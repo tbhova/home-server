@@ -245,55 +245,55 @@ services:
   # Portainer - WebUI for Containers
   # https://github.com/portainer/portainer-compose/blob/master/traefik/docker-compose.yml
   # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
-  portainer:
-    container_name: portainer
-    image: portainer/portainer-ce:latest
-    restart: always
-    # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
-    # command: -H tcp://socket-proxy:2375 # appears to not work. Workaround was to create a new socket-proxy:2375 endpoint on portainer settings.
-    # Create endpoint via Portainer UI -> Endpoints -> Add endpoint -> Docker `Environment Type`
-    networks:
-      - t2_proxy
-      - socket_proxy
-    depends_on:
-      - socket-proxy
-    security_opt:
-      - no-new-privileges:true
-     # ports:
-     # - "$PORTAINER_PORT:9000"
-    volumes:
-      #- /var/run/docker.sock:/var/run/docker.sock:ro # Use Docker Socket Proxy instead for improved security
-      - $DOCKERDIR/portainer/data:/data 
-    environment:
-      TZ: $TZ
-      PUID: $PUID
-      PGID: $PGID
-    labels:
-      - "traefik.enable=true"
-      ## Portainer
-      ## HTTP Routers
-      - "traefik.http.routers.portainer-secure.entrypoints=websecure"
-      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAINNAME}`)"
-      - "traefik.http.routers.portainer-secure.tls=true"
-      ## Middlewares
-      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file" # No Authentication
-      # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file" # Basic Authentication
-      - "traefik.http.routers.portainer-secure.middlewares=chain-oauth@file" # Google OAuth 2.0
-      ## HTTP Services
-      - "traefik.http.routers.portainer-secure.service=portainer-svc"
-      - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
-      ## Edge
-      ## HTTP Routers
-      - "traefik.http.routers.edge-secure.entrypoints=websecure"
-      - "traefik.http.routers.edge-secure.rule=Host(`edge.${DOMAINNAME}`)"
-      - "traefik.http.routers.edge-secure.tls=true"
-      ## Middlewares
-      # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file" # No Authentication
-      # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file" # Basic Authentication
-      - "traefik.http.routers.edge-secure.middlewares=chain-oauth@file" # Google OAuth 2.0
-      ## HTTP Services
-      - "traefik.http.routers.edge-secure.service=edge"
-      - "traefik.http.services.edge.loadbalancer.server.port=8000"
+  # portainer:
+  #   container_name: portainer
+  #   image: portainer/portainer-ce:latest
+  #   restart: always
+  #   # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
+  #   # command: -H tcp://socket-proxy:2375 # appears to not work. Workaround was to create a new socket-proxy:2375 endpoint on portainer settings.
+  #   # Create endpoint via Portainer UI -> Endpoints -> Add endpoint -> Docker `Environment Type`
+  #   networks:
+  #     - t2_proxy
+  #     - socket_proxy
+  #   depends_on:
+  #     - socket-proxy
+  #   security_opt:
+  #     - no-new-privileges:true
+  #    # ports:
+  #    # - "$PORTAINER_PORT:9000"
+  #   volumes:
+  #     #- /var/run/docker.sock:/var/run/docker.sock:ro # Use Docker Socket Proxy instead for improved security
+  #     - $DOCKERDIR/portainer/data:/data 
+  #   environment:
+  #     TZ: $TZ
+  #     PUID: $PUID
+  #     PGID: $PGID
+  #   labels:
+  #     - "traefik.enable=true"
+  #     ## Portainer
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.portainer-secure.entrypoints=websecure"
+  #     - "traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAINNAME}`)"
+  #     - "traefik.http.routers.portainer-secure.tls=true"
+  #     ## Middlewares
+  #     # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file" # No Authentication
+  #     # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file" # Basic Authentication
+  #     - "traefik.http.routers.portainer-secure.middlewares=chain-oauth@file" # Google OAuth 2.0
+  #     ## HTTP Services
+  #     - "traefik.http.routers.portainer-secure.service=portainer-svc"
+  #     - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+  #     ## Edge
+  #     ## HTTP Routers
+  #     - "traefik.http.routers.edge-secure.entrypoints=websecure"
+  #     - "traefik.http.routers.edge-secure.rule=Host(`edge.${DOMAINNAME}`)"
+  #     - "traefik.http.routers.edge-secure.tls=true"
+  #     ## Middlewares
+  #     # - "traefik.http.routers.portainer-rtr.middlewares=chain-no-auth@file" # No Authentication
+  #     # - "traefik.http.routers.portainer-rtr.middlewares=chain-basic-auth@file" # Basic Authentication
+  #     - "traefik.http.routers.edge-secure.middlewares=chain-oauth@file" # Google OAuth 2.0
+  #     ## HTTP Services
+  #     - "traefik.http.routers.edge-secure.service=edge"
+  #     - "traefik.http.services.edge.loadbalancer.server.port=8000"
       
   # Visual Studio Code
   # Alternative: https://hub.docker.com/r/linuxserver/code-server
@@ -1053,7 +1053,7 @@ services:
       - "9089:8080"
     volumes:
       - $DOCKERDIR/sabnzbd:/config
-      - /mnt/user/tmp/incomplete_downloads:/downloads/incomplete
+      - /mnt/user/downlaods/incomplete:/downloads/incomplete
       - /mnt/user/downloads:/downloads
       - /mnt/user/downloads/complete-media/movies:/downloads/complete/movies
       - /mnt/user/downloads/complete-media/tv:/downloads/complete/tv
