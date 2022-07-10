@@ -298,6 +298,8 @@ services:
   # Visual Studio Code
   # Alternative: https://hub.docker.com/r/linuxserver/code-server
   # https://hub.docker.com/r/codercom/code-server
+  # If this container complains about not being able to make new directories, run:
+  # chown 1000:users /mnt/user/appdata/docker/vscode/ -R
   code-server:
     # image: ghcr.io/linuxserver/code-server
     image: codercom/code-server:latest
@@ -306,8 +308,9 @@ services:
     restart: unless-stopped
     networks:
       - t2_proxy
-    security_opt:
-      - no-new-privileges:true
+    # security_opt:
+      # Required to be disabled for fixuid
+      # - no-new-privileges:true
     environment:
       TZ: $TZ
       PUID: $PUID
@@ -320,7 +323,7 @@ services:
       #PROXY_DOMAIN=code-server.my.domain #optional
     volumes:
       - $DOCKERDIR/vscode/root:/root
-      - $DOCKERDIR/vscode/home:/home/coder
+      - $DOCKERDIR/vscode/home/.config:/home/coder/.config
       - /mnt/user/appdata/home-server:/home-server
       - /mnt/user/appdata/Marlin:/Marlin
       - /mnt/user/appdata/ColleenSQL:/ColleenSQL
