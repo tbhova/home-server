@@ -1053,7 +1053,7 @@ services:
       - "9089:8080"
     volumes:
       - $DOCKERDIR/sabnzbd:/config
-      - /mnt/user/downlaods/incomplete:/downloads/incomplete
+      - /mnt/user/downloads/incomplete:/downloads/incomplete
       - /mnt/user/downloads:/downloads
       - /mnt/user/downloads/complete-media/movies:/downloads/complete/movies
       - /mnt/user/downloads/complete-media/tv:/downloads/complete/tv
