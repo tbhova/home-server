@@ -22,6 +22,7 @@
     <vcpupin vcpu='7' cpuset='10'/>
     <vcpupin vcpu='8' cpuset='5'/>
     <vcpupin vcpu='9' cpuset='11'/>
+    <emulatorpin cpuset='0,6'/>
   </cputune>
   <resource>
     <partition>/machine</partition>
