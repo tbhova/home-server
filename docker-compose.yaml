@@ -838,7 +838,7 @@ services:
     container_name: handbrake
     restart: unless-stopped
     # Pin handbrake to both threads on core 1
-    cpuset: 5,11
+    cpuset: 1,7
     networks:
       - t2_proxy
     security_opt:
@@ -955,6 +955,10 @@ services:
       - t2_proxy
     security_opt:
       - no-new-privileges:true
+      # See https://forums.unraid.net/topic/80729-support-linuxserverio-calibre/page/12/ and
+      # https://github.com/linuxserver/docker-calibre/issues/97
+      # This is required (probably) for now, to run on a container version above 6.4.0
+      - seccomp:unconfined
     ports:
     #  - "9082:8080" # Desktop GUI
       - "9081:8081" # Webserver GUI and Calibre content server
