@@ -427,6 +427,7 @@ services:
       - $DOCKERDIR/syncthing:/config
       - /mnt/user/media/eReaders_sync:/eReaders
       - /mnt/user/backups/TylerPhone:/TylerPhone
+      - /mnt/user/backups/ColleenPhone:/ColleenPhone
     ports:
       - 8384:8384
       - 22000:22000
