@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<domain type='kvm' id='2'>
+<domain type='kvm' id='1'>
   <name>Windows 10</name>
   <uuid>4c7c30aa-96ef-3dea-b8de-465d3d7f9da7</uuid>
   <metadata>
@@ -101,25 +101,25 @@
     <interface type='bridge'>
       <mac address='52:54:00:c9:f0:cc'/>
       <source bridge='br0'/>
-      <target dev='vnet1'/>
+      <target dev='vnet0'/>
       <model type='virtio-net'/>
       <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
     </interface>
     <serial type='pty'>
-      <source path='/dev/pts/1'/>
+      <source path='/dev/pts/0'/>
       <target type='isa-serial' port='0'>
         <model name='isa-serial'/>
       </target>
       <alias name='serial0'/>
     </serial>
-    <console type='pty' tty='/dev/pts/1'>
-      <source path='/dev/pts/1'/>
+    <console type='pty' tty='/dev/pts/0'>
+      <source path='/dev/pts/0'/>
       <target type='serial' port='0'/>
       <alias name='serial0'/>
     </console>
     <channel type='unix'>
-      <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-2-Windows 10/org.qemu.guest_agent.0'/>
+      <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-1-Windows 10/org.qemu.guest_agent.0'/>
       <target type='virtio' name='org.qemu.guest_agent.0' state='disconnected'/>
       <alias name='channel0'/>
       <address type='virtio-serial' controller='0' bus='0' port='1'/>
