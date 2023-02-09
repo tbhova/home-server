@@ -86,8 +86,8 @@ http:
     homeassistant:
       loadBalancer:
         servers:
-        - url: "http://192.168.1.252:8123/"
+        - url: "http://192.168.2.252:8123/"
     transmission:
       loadBalancer:
         servers:
-        - url: "http://192.168.1.253:9091/"
+        - url: "http://192.168.2.253:9091/"
