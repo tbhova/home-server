@@ -196,7 +196,6 @@ services:
     container_name: watchtower
     restart: unless-stopped
     networks:
-      - default
       - socket_proxy
     depends_on:
       - socket-proxy
