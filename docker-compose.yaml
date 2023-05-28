@@ -46,10 +46,10 @@ services:
       ## Certificate Settings (DNS Challenge w/ Cloudflare) -  https://docs.traefik.io/https/acme/#configuration-examples ##
       - "--certificatesResolvers.dns-cloudflare.acme.email=$EMAIL"
       - "--certificatesResolvers.dns-cloudflare.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesResolvers.dns-cloudflare.acme.dnschallenge=true"
+      - "--certificatesResolvers.dns-cloudflare.acme.dnsChallenge=true"
       # Commented out because: https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Forcing_the_Use_of_Wildcard_Certs
       # - "--certificatesResolvers.dns-cloudflare.acme.dnschallenge.provider=cloudflare"
-      - "--certificatesResolvers.dns-cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53, 1.0.0.1:53"
+      - "--certificatesResolvers.dns-cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53, 1.0.0.1:53"
       ## Global settings
       - "--global.sendAnonymousUsage" # <== Send anonymous usage data https://docs.traefik.io/contributing/data-collection/
       
