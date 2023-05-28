@@ -198,8 +198,6 @@ services:
     networks:
       - default
       - socket_proxy
-    networks:
-      - socket_proxy
     depends_on:
       - socket-proxy
     # volumes:
