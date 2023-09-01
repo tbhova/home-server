@@ -54,6 +54,10 @@ http:
         # Setting contentSecurityPolicy is more secure but it can break things. Proper auth will reduce the risk.
         # the below line also breaks some apps due to 'none' - sonarr, radarr, etc.
         # contentSecurityPolicy = "frame-ancestors '*.example.com:*';object-src 'none';script-src 'none';"
+        # The Studio Code Server element of Home Assistant doesn't work without unsafe-inline. I figured this out from the
+        # Chrome developer console - the error was unintellible, but it did say that unsafe-inline wasn't enabled.
+        # TODO: hova - It might make sense to figure out a solution without the word unsafe in it.
+        contentSecurityPolicy: "script-src 'self' 'unsafe-inline'"
         permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=(), vr=()," 
         customResponseHeaders:
           X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex,"
