@@ -66,8 +66,7 @@ http:
       forwardAuth:
         address: "http://oauth:4181" # Make sure you have the OAuth service in docker-compose.yml
         trustForwardHeader: true
-        authResponseHeaders:
-         - "X-Forwarded-User"
+        authResponseHeaders: "X-Forwarded-User"
     # https://docs.traefik.io/middlewares/chain/
     # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Security_Headers_as_Middlewares_File
     # No auth for services like Plex.
