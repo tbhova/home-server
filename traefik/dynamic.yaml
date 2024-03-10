@@ -59,8 +59,9 @@ http:
         # contentSecurityPolicy = "frame-ancestors '*.example.com:*';object-src 'none';script-src 'none';"
         # The Studio Code Server element of Home Assistant doesn't work without unsafe-inline. I figured this out from the
         # Chrome developer console - the error was unintellible, but it did say that unsafe-inline wasn't enabled.
+        # Similarly, Plex doesn't work without unsafe-eval.
         # TODO: hova - It might make sense to figure out a solution without the word unsafe in it.
-        contentSecurityPolicy: "script-src 'self' 'unsafe-inline'"
+        contentSecurityPolicy: "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
         permissionsPolicy: "camera=(), geolocation=(), microphone=(), payment=(), usb=(), vr=()," 
         customResponseHeaders:
           X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex,"
