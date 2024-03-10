@@ -1,5 +1,8 @@
 # Most services should use Docker labels. Non docker services can go in here. See: https://community.containo.us/t/expose-a-docker-container-without-labels/1907/9
 
+# log:
+#   level: DEBUG
+
 http:
   routers:
     # Define a connection between requests and services

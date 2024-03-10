@@ -10,7 +10,8 @@ services:
   # https://docs.traefik.io
   # https://www.smarthomebeginner.com/my-smart-home-setup-2019/
   traefik:
-    image: "traefik:v2.10.4"
+    image: "traefik:v2.11"
+    # image: "traefik:v3.0"
     container_name: "traefik"
     restart: always
     environment:
@@ -33,7 +34,8 @@ services:
       - "--providers.docker.network=t2_proxy"
       - "--providers.file=true" # Enable file provider for services hosted outside of docker compose.
       - "--providers.file.watch=true"
-      - "--providers.file.filename=/etc/traefik/dynamic.yaml" # <== Referring to a dynamic configuration file
+      # https://doc.traefik.io/traefik/providers/file/#directory recommends directory over filename
+      - "--providers.file.directory=/etc/traefik/" # <== Referring to a dynamic configuration file
       ## Entrypoints Settings - https://docs.traefik.io/routing/entrypoints/#configuration ##
       # https://docs.traefik.io/migration/v1-to-v2/#http-to-https-redirection-is-now-configured-on-routers
       - "--entrypoints.web.address=:80"  # HTTP
