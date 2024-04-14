@@ -1,5 +1,4 @@
-#version: '3.8'
-version: '2.4'
+# Docker has deprecated versions. I'm not sure what happens to v2-only features like CPU pinning anf v2 networking.
 # Only v2 of compose supports cpuset for pinning https://forums.docker.com/t/docker-compose-v3-linux-core-isolation-cpu-pinning/101148.
 
 services:
