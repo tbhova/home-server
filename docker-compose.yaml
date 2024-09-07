@@ -9,7 +9,7 @@ services:
   # https://docs.traefik.io
   # https://www.smarthomebeginner.com/my-smart-home-setup-2019/
   traefik:
-    image: "traefik:v3.0"
+    image: "traefik:v3.1"
     container_name: "traefik"
     restart: always
     environment:
