@@ -200,6 +200,8 @@ services:
       - socket_proxy
     depends_on:
       - socket-proxy
+    command:
+      - --cleanup=true
     # volumes:
       # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead for improved security
       # Docker's config.json
@@ -1003,6 +1005,7 @@ services:
   
   ################################ Downloads
   
+  # This could also be routed through a Wireguard or separate OpenVPN container: https://github.com/sebdanielsson/compose-transmission-wireguard/blob/main/compose.yaml
   # Run all Transmission traffic through VPN Unlimited
   # https://github.com/haugene/docker-transmission-openvpn   
   # https://www.smarthomebeginner.com/docker-home-media-server-2018-basic/#Transmission_with_VPN_-_Bittorrent_Downloader
@@ -1050,7 +1053,7 @@ services:
       OPENVPN_PASSWORD: $VPN_UNLIMITED_PASSWORD
       # https://my.keepsolid.com/products/vpn/ has a list of current servers that can be cross referenced against the GitHub.
       # OPENVPN_CONFIG: ca-tr,fr,ro  # Corresponds to a file name in https://github.com/haugene/vpn-configs-contrib/tree/main/openvpn/vpnunlimited
-      OPENVPN_CONFIG: vpn_unlimited_ca-tr,vpn_unlimited_fr,vpn_unlimited_ro  # Corresponds to a file name in ./vpn_unlimited
+      OPENVPN_CONFIG: vpn_unlimited_ca-tr,vpn_unlimited_ca-tr_openvpn,vpn_unlimited_fr,vpn_unlimited_ro # Corresponds to file names in ./vpn_unlimited without .ovpn extension
       OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
       LOCAL_NETWORK: 192.168.2.0/24
       TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
