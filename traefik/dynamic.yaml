@@ -92,8 +92,8 @@ http:
     homeassistant:
       loadBalancer:
         servers:
-        - url: "http://192.168.2.252:8123/"
+        - url: "http://homeassistant.home.arpa:8123/"
     transmission:
       loadBalancer:
         servers:
-        - url: "http://192.168.2.253:9091/"
+        - url: "http://unraidserver.home.arpa:9091/"

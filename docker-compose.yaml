@@ -40,8 +40,8 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure.address=:443"    # HTTPS
-      # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/, and Home Assistant at 192.168.2.252 for VSCode: https://community.traefik.io/t/use-x-forwarded-in-traefik-v2/5206/5, and 192.168.90.0/24 for t2_proxy docker network.
-      - "--entrypoints.websecure.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22,192.168.2.0/24,192.168.90.0/24"
+      # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/, and Home Assistant at 172.16.50.11 for VSCode: https://community.traefik.io/t/use-x-forwarded-in-traefik-v2/5206/5, and 172.16.90.0/24 for t2_proxy docker network.
+      - "--entrypoints.websecure.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22,172.16.50.0/24,172.16.90.0/24"
       ## Certificate Settings (DNS Challenge w/ Cloudflare) -  https://docs.traefik.io/https/acme/#configuration-examples ##
       - "--certificatesResolvers.dns-cloudflare.acme.email=$EMAIL"
       - "--certificatesResolvers.dns-cloudflare.acme.storage=/letsencrypt/acme.json"
@@ -56,7 +56,7 @@ services:
       
      # networks:
      #   t2_proxy:
-     #    ipv4_address: 192.168.90.254 # You can specify a static IP
+     #    ipv4_address: 172.16.90.254 # You can specify a static IP
     networks:
       - socket_proxy
       - t2_proxy
@@ -145,7 +145,7 @@ services:
     networks:
       # t2_proxy:
       socket_proxy:
-        ipv4_address: 192.168.91.253 # You can specify a static IP
+        ipv4_address: 172.16.91.253 # You can specify a static IP
     privileged: true
     # ports:
     #  - "2375:2375"
@@ -464,7 +464,7 @@ services:
   #     - no-new-privileges:true
   #   networks:
   #     influxdb:
-  #       ipv4_address: 192.168.92.254 # You can specify a static IP
+  #       ipv4_address: 172.16.92.254 # You can specify a static IP
   #   ports:
   #     - "8086:8086" # UI + HTTP API
   #     #- "8088:8088" # RPC API
@@ -494,7 +494,7 @@ services:
   #     - no-new-privileges:true
   #   networks:
   #     influxdbv1:
-  #       ipv4_address: 192.168.93.254 # You can specify a static IP
+  #       ipv4_address: 172.16.93.254 # You can specify a static IP
   #   ports:
   #     - "9086:8086" # API
   #   volumes:
@@ -694,7 +694,7 @@ services:
   #     VRKN_INFLUXDB_VERIFY_SSL: 'false'
   #     VRKN_INFLUXDB_USERNAME: 'varken'
   #     VRKN_INFLUXDB_PASSWORD: 'varken'
-  #     VRKN_TAUTULLI_1_URL: 192.168.2.253:8181
+  #     VRKN_TAUTULLI_1_URL: http://unraidserver.home.arpa:8181
   #     VRKN_TAUTULLI_1_APIKEY: $TAUTULLI_API_KEY
   #     VRKN_TAUTULLI_1_SSL: 'false'
   #     VRKN_TAUTULLI_1_VERIFY_SSL: 'false'
@@ -702,7 +702,7 @@ services:
   #     VRKN_TAUTULLI_1_GET_ACTIVITY_RUN_SECONDS: 30
   #     VRKN_TAUTULLI_1_GET_STATS: 'true'
   #     VRKN_TAUTULLI_1_GET_STATS_RUN_SECONDS: 3600
-  #     VRKN_SONARR_1_URL: 192.168.2.253:8989
+  #     VRKN_SONARR_1_URL: http://unraidserver.home.arpa:8989
   #     VRKN_SONARR_1_APIKEY: $SONARR_API_KEY
   #     VRKN_SONARR_1_SSL: 'false'
   #     VRKN_SONARR_1_VERIFY_SSL: 'false'
@@ -712,7 +712,7 @@ services:
   #     VRKN_SONARR_1_FUTURE_DAYS_RUN_SECONDS: 300
   #     VRKN_SONARR_1_QUEUE: 'true'
   #     VRKN_SONARR_1_QUEUE_RUN_SECONDS: 300
-  #     VRKN_RADARR_1_URL: 192.168.2.253:7878
+  #     VRKN_RADARR_1_URL: http://unraidserver.home.arpa:7878
   #     VRKN_RADARR_1_APIKEY: $RADARR_API_KEY
   #     VRKN_RADARR_1_SSL: 'false'
   #     VRKN_RADARR_1_VERIFY_SSL: 'false'
@@ -826,7 +826,7 @@ services:
       PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
       PLEX_UID: $PUID
       PLEX_GID: $PGID
-      ADVERTISE_IP: http://192.168.2.253:32400/,https://plex.${DOMAINNAME}
+      ADVERTISE_IP: http://http://unraidserver.home.arpa:32400/,https://plex.${DOMAINNAME}
     hostname: "PlexServer"
     volumes:
       - $DOCKERDIR/plex_config:/config
@@ -1016,7 +1016,7 @@ services:
     networks:
       # - t2_proxy
       t2_proxy:
-        ipv4_address: 192.168.90.90
+        ipv4_address: 172.16.90.90
     # security_opt:
     #   - no-new-privileges:true
     cap_add:
@@ -1055,10 +1055,10 @@ services:
       # OPENVPN_CONFIG: ca-tr,fr,ro  # Corresponds to a file name in https://github.com/haugene/vpn-configs-contrib/tree/main/openvpn/vpnunlimited
       OPENVPN_CONFIG: vpn_unlimited_ca-tr,vpn_unlimited_ca-tr_openvpn,vpn_unlimited_fr,vpn_unlimited_ro # Corresponds to file names in ./vpn_unlimited without .ovpn extension
       OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60"
-      LOCAL_NETWORK: 192.168.2.0/24
+      LOCAL_NETWORK: 172.16.50.0/24
       TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
       # TODO Disabled until http://haugene.github.io/docker-transmission-openvpn/vpn-networking/#how_to_fix_this proxy is in this container (or we add a proxy container)
-      #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,192.168.2.*
+      #TRANSMISSION_RPC_HOST_WHITELIST: 127.0.0.1,172.16.50.*
       TRANSMISSION_RPC_PASSWORD: $TRANSMISSION_WEBUI_PASSWORD
       TRANSMISSION_RPC_USERNAME: $TRANSMISSION_WEBUI_USERNAME
       TRANSMISSION_UMASK: 002
@@ -1397,7 +1397,7 @@ services:
   #    restart: always
   #    networks:
   #      t2_proxy:
-  #        ipv4_address: 192.168.90.250 
+  #        ipv4_address: 172.16.90.250 
   #    security_opt:
   #      - no-new-privileges:true
   #    ports:
@@ -1424,31 +1424,31 @@ networks:
     name: t2_proxy
     ipam:
       config:
-       - subnet: 192.168.90.0/24
+       - subnet: 172.16.90.0/24
          # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/compose-file-v2/#networks
-         gateway: '192.168.90.1'
+         gateway: '172.16.90.1'
   # Docker socket proxy.
   # https://www.smarthomebeginner.com/traefik-docker-security-best-practices/#9_Use_a_Docker_Socket_Proxy
   socket_proxy:
     name: socket_proxy
     ipam:
       config:
-       - subnet: 192.168.91.0/24
+       - subnet: 172.16.91.0/24
          # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/compose-file-v2/#networks
-         gateway: '192.168.91.1'
+         gateway: '172.16.91.1'
   # InfluxDB.
   # influxdb:
   #   name: influxdb
   #   ipam:
   #     config:
-  #      - subnet: 192.168.92.0/24
+  #      - subnet: 172.16.92.0/24
   #        # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/compose-file-v2/#networks
-  #        gateway: '192.168.92.1'
+  #        gateway: '172.16.92.1'
   # InfluxDB V1.
   # influxdbv1:
   #   name: influxdbv1
   #   ipam:
   #     config:
-  #      - subnet: 192.168.93.0/24
+  #      - subnet: 172.16.93.0/24
   #        # gateway is only honored for v2 (for now): https://github.com/docker/compose/issues/6569 and https://docs.docker.com/compose/compose-file/compose-file-v2/#networks
-  #        gateway: '192.168.93.1'
+  #        gateway: '172.16.93.1'
