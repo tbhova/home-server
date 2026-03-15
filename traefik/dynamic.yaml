@@ -14,6 +14,7 @@ http:
       tls:
         certResolver: dns-cloudflare
       middlewares:
+        # Oauth works with the web app, but not mobile apps.
         - chain-no-auth
     transmission-secure:
       rule: "Host(`transmission.tylerhovanec.com`)"
